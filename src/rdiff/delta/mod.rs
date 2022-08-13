@@ -102,7 +102,7 @@ impl Delta {
                     // If there is no match
                     // Shift to the right in buffer by removing first byte
                     let diff_byte = buffer.remove(0);
-                    // Update chunk delta list with that byte as a difference
+                    // Update chunk delta with that byte as a difference
                     chunk_delta_list.push(ChunkDelta::D(diff_byte));
                 }              
             } else {
