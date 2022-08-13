@@ -7,6 +7,7 @@ use super::RdiffChunk;
  
 pub trait RdiffChunkIterator {
     fn next_chunk(&mut self) -> Result<Option<RdiffChunk>, RdiffError>;
+    fn get_chunk_size(&self) -> usize;
 }
 
 #[derive(Debug,PartialEq)]
@@ -23,8 +24,6 @@ impl BufferedRdiffChunkIterator {
         let buffer:Vec<u8> = Vec::new();
         BufferedRdiffChunkIterator { chunk_size, buffer, rdiff_file}
     }
-
-    pub fn get_chunk_size(&self) -> usize {self.chunk_size}
 
     pub fn new_with_chunk_size(chunk_size:usize, rdiff_file:RdiffFile) -> 
         Result<BufferedRdiffChunkIterator,RdiffError> {
@@ -57,6 +56,8 @@ impl BufferedRdiffChunkIterator {
 }
 
 impl RdiffChunkIterator for BufferedRdiffChunkIterator {
+    fn get_chunk_size(&self) -> usize {self.chunk_size}
+    
     fn next_chunk(&mut self) -> Result<Option<RdiffChunk>, RdiffError> {
         // If memory buffer contains at one chunk
         if self.buffer.len() >= self.chunk_size {

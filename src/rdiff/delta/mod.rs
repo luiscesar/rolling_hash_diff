@@ -10,7 +10,7 @@ use super::chunk::iterator::RdiffChunkIterator;
 #[derive(Debug,Serialize,Deserialize)]
 pub enum ChunkDelta {
     Match(u32),
-    D(u8),
+    Diff(Vec<u8>),
 }
 
 #[derive(Debug,Serialize,Deserialize)]
@@ -54,56 +54,110 @@ impl Delta {
         // Set chunk size using the signature chunk size
         let chunk_size = signature.chunk_size;
         // Loop until the input file has been processed
-        loop {
-            // If buffer is not big enough 
-            if buffer.len() < chunk_size {
-                // Get next chunk from iterator
-                let rdiff_chunk_result = iterator.next_chunk()?;
-                if let Some(mut chunk) = rdiff_chunk_result {
-                    // If there data more data to process update memory buffer
-                    buffer.append(&mut chunk);
-                } 
-            }
+        'chunk: loop {
+            // Get next chunk from iterator
+            let rdiff_chunk_result = iterator.next_chunk()?;
+            if let Some(mut chunk) = rdiff_chunk_result {
+                // If there data more data to process update memory buffer
+                buffer.append(&mut chunk);
+            } 
             // If there is more data to process
             if buffer.len() > 0 { 
-                // Check the last chunk
+                // If it is the last chunk
                 if buffer.len() < chunk_size {
-                    // If the byte prefix of buffer has same size of the last chunk in signature's file
-                    if signature.last_chunk_size <= buffer.len() {
-                        // Get that byte prefix as a last chunk to check
-                        let chunk = &buffer[..signature.last_chunk_size];
-                        // If that chunk is a match with one in signature
+                    // Check for last chunk match
+                    if buffer.len() == signature.last_chunk_size {
+                        let last_chunk = &buffer[..];
+                        // If last chunk is a match
                         if let Some(chunk_delta) = 
-                            Delta::get_chunk_delta_match(&signature, &weak_hash_ptr, &strong_hash_ptr, chunk) {
-                            // Add it as a match chunk delta
+                            Delta::get_chunk_delta_match(&signature, &weak_hash_ptr, &strong_hash_ptr, last_chunk) {
+                            // Add last chunk as a chunk delta match
                             chunk_delta_list.push(chunk_delta);
-                            // Update buffer by removing that chunk
-                            buffer.drain(..signature.last_chunk_size);
+                            // No more data to process, the chunk' loop stops
+                            break;
                         }
-                    }  
-                    // Update chunk delta list with the rest of bytes as differences
-                    buffer.iter().for_each(|b| chunk_delta_list.push(ChunkDelta::D(*b)));
-                    // As there is no more data to process, loop stops
+                    }
+                    // If there is not chunk delta match,
+                    // Update chunk delta list with buffer as chunk delta differences
+                    chunk_delta_list.push(ChunkDelta::Diff(buffer));
+                    // Chunk' loop stops 
                     break;
                 } else {
-                    // Otherwise process it as a normal chunk
                     // Get chunk from the memory buffer
                     let chunk = &buffer[..chunk_size];
-                    // If the chunk is a match with one in signature
+                    // If the chunk is a chunk delta match
                     if let Some(chunk_delta) = 
                         Delta::get_chunk_delta_match(&signature, &weak_hash_ptr, &strong_hash_ptr, chunk) {
-                        // Add it as a match chunk delta
+                        // Add chunk as a match chunk delta
                         chunk_delta_list.push(chunk_delta);
                         // Update buffer by removing that chunk
                         buffer.drain(..chunk_size);
-                        // Loop again
+                        // Get the next chunk, continue 'chunk loop
                         continue;
                     }
-                    // If there is no match
-                    // Shift to the right in buffer by removing first byte
-                    let diff_byte = buffer.remove(0);
-                    // Update chunk delta with that byte as a difference
-                    chunk_delta_list.push(ChunkDelta::D(diff_byte));
+                    // If there is not a chunk delta match
+                    // Search for longest byte sequence until either a chunk delta match 
+                    // or an eof is found
+                    // Init byte difference list
+                    let mut differences:Vec<u8> = Vec::new();
+                    loop {
+                        // Get next byte difference
+                        let diff_byte = buffer.remove(0);
+                        // Update byte differences list
+                        differences.push(diff_byte);
+                         // If buffer is not big enough 
+                        if buffer.len() < chunk_size {
+                            // Get next chunk from iterator
+                            let rdiff_chunk_result = iterator.next_chunk()?;
+                            if let Some(mut chunk) = rdiff_chunk_result {
+                                // If there is more data to process.
+                                // update memory buffer
+                                buffer.append(&mut chunk);
+                            } 
+                        }
+                        // Find a chunk delta match
+                        if buffer.len() >= chunk_size {
+                            // Get chunk from the memory buffer
+                            let chunk = &buffer[..chunk_size];
+                            // If the chunk is a chunk delta match
+                            if let Some(chunk_delta) = 
+                                Delta::get_chunk_delta_match(&signature, &weak_hash_ptr, &strong_hash_ptr, chunk) {
+                                // Add differences to chunck delta list
+                                chunk_delta_list.push(ChunkDelta::Diff(differences));
+                                // Add chunk delta match to chunk delta list
+                                chunk_delta_list.push(chunk_delta);
+                                // Update buffer by removing that chunk
+                                buffer.drain(..chunk_size);
+                                // Get next chunk, continue to loop 'chunk
+                                continue 'chunk;
+                            }
+                            // If there is not a chunk delta match,
+                            // Get next first byte in buffer, continue to loop
+                        } else {
+                            // if there are no more chunks
+                             // Check for last chunk
+                            if buffer.len() == signature.last_chunk_size {
+                                let last_chunk = &buffer[..signature.last_chunk_size];
+                                // If last chunk is a chunk delta match
+                                if let Some(chunk_delta) = 
+                                    Delta::get_chunk_delta_match(&signature, &weak_hash_ptr, &strong_hash_ptr, last_chunk) {
+                                    // Add differences to chunck delta list
+                                    chunk_delta_list.push(ChunkDelta::Diff(differences));
+                                    // Add chunk delta match to chunk delta list
+                                    chunk_delta_list.push(chunk_delta);
+                                    // No more data to process, loop 'chunk stops
+                                    break 'chunk;
+                                }
+                            }
+                            // If there is no match with last chunk
+                            // Update difference list with buffer
+                            differences.append(&mut buffer);
+                            // Add differences to chunck delta list
+                            chunk_delta_list.push(ChunkDelta::Diff(differences));
+                            // Loop 'chunk stops
+                            break 'chunk;
+                        }
+                    }
                 }              
             } else {
                 // If there is no more data process, loop stops
