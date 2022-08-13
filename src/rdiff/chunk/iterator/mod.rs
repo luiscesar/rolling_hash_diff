@@ -1,0 +1,86 @@
+use std::{cmp};
+
+use crate::rdiff::{io::RdiffFile, constants::BLOCK_SIZE, error::{RdiffError, RollingHashError, messages::INVALID_CHUNK_SIZE}};
+
+use super::RdiffChunk;
+
+ 
+pub trait RdiffChunkIterator {
+    fn next_chunk(&mut self) -> Result<Option<RdiffChunk>, RdiffError>;
+}
+
+#[derive(Debug,PartialEq)]
+pub struct BufferedRdiffChunkIterator {
+    chunk_size:usize,
+    buffer:Vec<u8>,
+    rdiff_file:RdiffFile,
+}
+
+impl BufferedRdiffChunkIterator {
+    pub fn new(rdiff_file:RdiffFile) -> BufferedRdiffChunkIterator {
+        let chunk_size = 
+            BufferedRdiffChunkIterator::compute_chunk_size(&rdiff_file);
+        let buffer:Vec<u8> = Vec::new();
+        BufferedRdiffChunkIterator { chunk_size, buffer, rdiff_file}
+    }
+
+    pub fn get_chunk_size(&self) -> usize {self.chunk_size}
+
+    pub fn new_with_chunk_size(chunk_size:usize, rdiff_file:RdiffFile) -> 
+        Result<BufferedRdiffChunkIterator,RdiffError> {
+        BufferedRdiffChunkIterator::validate_chunk_size(chunk_size)?;
+        let buffer:Vec<u8> = Vec::new();
+        Ok(BufferedRdiffChunkIterator { chunk_size, buffer, rdiff_file})
+    }
+
+    fn compute_chunk_size(rdiff_file:&RdiffFile) -> usize {
+        if rdiff_file.size() > 1 {
+            if rdiff_file.size() > BLOCK_SIZE {
+                BLOCK_SIZE
+            } else {
+                (((rdiff_file.size() as f64) / 2.0).round() ) as usize
+            }
+        } else {
+            1
+        }
+    }
+    
+    fn validate_chunk_size(chunk_size:usize) -> Result<(),RdiffError> {
+        if chunk_size > BLOCK_SIZE {
+            let rdiff_error = 
+                RollingHashError::rdiff_error(INVALID_CHUNK_SIZE);
+            return Err(rdiff_error)
+        }
+        Ok(())
+    }
+
+}
+
+impl RdiffChunkIterator for BufferedRdiffChunkIterator {
+    fn next_chunk(&mut self) -> Result<Option<RdiffChunk>, RdiffError> {
+        if self.buffer.len() >= self.chunk_size {
+            let next_chunk_iter = self.buffer.drain(..self.chunk_size);
+            let next_chunk = next_chunk_iter.as_slice();
+            let rdiff_chunk = Vec::from(next_chunk);
+            Ok(Some(rdiff_chunk))
+        } else {
+            if let Some((size, next_block)) = self.rdiff_file.read_block()? {
+                let next_block_data = &next_block[..size];
+                self.buffer.extend_from_slice(next_block_data);
+            } 
+            if self.buffer.len() > 0 {
+                let next_chunk_size = cmp::min(self.chunk_size, self.buffer.len());
+                let next_chunk_iter = self.buffer.drain(..next_chunk_size);
+                let next_chunk = next_chunk_iter.as_slice();
+                let rdiff_chunk = Vec::from(next_chunk);
+                Ok(Some(rdiff_chunk))
+            } else {
+                Ok(None)
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests;
+
