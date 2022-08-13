@@ -58,23 +58,33 @@ impl BufferedRdiffChunkIterator {
 
 impl RdiffChunkIterator for BufferedRdiffChunkIterator {
     fn next_chunk(&mut self) -> Result<Option<RdiffChunk>, RdiffError> {
+        // If memory buffer contains at one chunk
         if self.buffer.len() >= self.chunk_size {
+            // Get that chunk and remove it from buffer
             let next_chunk_iter = self.buffer.drain(..self.chunk_size);
             let next_chunk = next_chunk_iter.as_slice();
+            // Get rdiff chunk
             let rdiff_chunk = Vec::from(next_chunk);
+            // Return rdiff chunk
             Ok(Some(rdiff_chunk))
         } else {
+            // If memory buffer does not contain a chunk, get one from file, 
+            // if there is one
             if let Some((size, next_block)) = self.rdiff_file.read_block()? {
+                // Update memory buffer with chunk from file
                 let next_block_data = &next_block[..size];
                 self.buffer.extend_from_slice(next_block_data);
             } 
+            // If buffer contains data
             if self.buffer.len() > 0 {
+                // Get a normal chunk or the last chunk and update memory buffer
                 let next_chunk_size = cmp::min(self.chunk_size, self.buffer.len());
                 let next_chunk_iter = self.buffer.drain(..next_chunk_size);
                 let next_chunk = next_chunk_iter.as_slice();
                 let rdiff_chunk = Vec::from(next_chunk);
                 Ok(Some(rdiff_chunk))
             } else {
+                // If buffer contains no more data, return none
                 Ok(None)
             }
         }
