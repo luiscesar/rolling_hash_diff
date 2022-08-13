@@ -60,7 +60,7 @@ impl Delta {
                 // Get next chunk from iterator
                 let rdiff_chunk_result = iterator.next_chunk()?;
                 if let Some(mut chunk) = rdiff_chunk_result {
-                    // If there are more data update memory buffer
+                    // If there data more data to process update memory buffer
                     buffer.append(&mut chunk);
                 } 
             }
