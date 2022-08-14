@@ -1,4 +1,3 @@
-pub const BLOCK_SIZE:usize = 512;
-
+pub const BLOCK_SIZE:usize = 128;
 pub const SIGNATURE:&str = "signature";
 pub const DELTA:&str = "delta";

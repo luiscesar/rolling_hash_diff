@@ -7,6 +7,7 @@ pub mod hash;
 pub mod io;
 pub mod constants;
 pub mod chunk;
+pub mod util;
 
 pub type RdiffMainResult = Result<(),RdiffError>;
 

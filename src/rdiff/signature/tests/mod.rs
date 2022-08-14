@@ -1,10 +1,13 @@
+use std::time::{SystemTime};
+
 use crate::rdiff::hash::{strong::rdiff_sha1::RdiffSha1, weak::rdiff_addler::RdiffAddler};
 
 use super::Signature;
 
 #[test]
 fn test_signature_create_signature_case1() {
-    let file_name = "resources/test.txt";
+    let file_name = "resources/test_signature_case1.txt";
+    
     let strong_hash_ptr = RdiffSha1::new_ptr();
     let weak_hash_ptr = RdiffAddler::new_ptr();
     let signature = 

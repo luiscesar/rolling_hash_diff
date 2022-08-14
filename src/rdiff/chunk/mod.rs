@@ -9,13 +9,13 @@ pub type RdiffDigest = Vec<u8>;
 
 pub type RdiffChunk = Vec<u8>;
 
-#[derive(Debug,Serialize,Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct RdiffChunkDigest {
     pub index:u32,
     pub digest:RdiffDigest,
 }
 
-#[derive(Debug,Serialize,Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct RdiffChunkTable {
     pub(crate) chunk_table:HashMap<RdiffChecksum,Vec<RdiffChunkDigest>>,
 }
