@@ -114,8 +114,14 @@ fn test_rdiff_chunk_iterator_buffered_new_with_chunk_size_case1() {
    let file_name = "resources/buffered_rdiff_chunk_iterator_file1.txt";
    let rdiff_file = RdiffFile::new(file_name).unwrap();
    let chunk_size:usize = 16;
-   let mut iterator = 
+   let iterator = 
       BufferedRdiffChunkIterator::new_with_chunk_size(chunk_size, rdiff_file).unwrap();
+
+   let rdiff_file = RdiffFile::new(file_name).unwrap();   
+   let buffer:Vec<u8> = Vec::new();
+   let expected_iterator = 
+      BufferedRdiffChunkIterator{chunk_size, buffer, rdiff_file};
+   assert_eq!(iterator, expected_iterator);
 }
 
 #[test]

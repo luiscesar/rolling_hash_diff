@@ -74,6 +74,7 @@ impl Signature {
             // Get next chunk
             let rdiff_chunk_result = iterator.next_chunk()?;
             if let Some(chunk) = rdiff_chunk_result {
+                // If there is another chunk, process it
                 // Update last chunk size
                 last_chunk_size = chunk.len();
                 // Compute checksum using weak hash
@@ -81,19 +82,21 @@ impl Signature {
                 // Compute digest using strong hash
                 let digest = strong_hash_ptr.digest(chunk.as_slice());
                 // Update chunk table with new chunk data
-                // Check for checksum's list, if it exists get the list with previous digests
-                // Otherwise create new entry with empty list
+                // Check for checksum's list, if there is an entry with current checksum,
+                // get the list with all previous digests
+                // Otherwise create new entry for current checksum with empty list
                 let chunk_data = 
                     rdiff_chunk_table.chunk_table.
                     entry(checksum).
                     or_insert(Vec::new());
                 // Update chunk index
                 index += 1;
-                // Get new chunk data from index and digest
+                // Get new chunk data from current index and current digest
                 let rdiff_chunk_digest = RdiffChunkDigest{index, digest};
                 // Update checksum's list with new chunk data
                 chunk_data.push(rdiff_chunk_digest);
             } else {
+                // If there are more chunks, loop stops
                 break;
             }
         }
