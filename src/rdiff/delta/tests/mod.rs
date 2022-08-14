@@ -713,7 +713,6 @@ fn test_delta_create_delta_file_addition_between_chunks_case5() {
     assert_eq!(result,());
 
     // Create new file version
-    // Create new file version
     // By addition between chunks
     let addition_size = 30;
     {
