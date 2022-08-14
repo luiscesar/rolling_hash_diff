@@ -363,7 +363,7 @@ fn test_delta_generate_delta_addition_between_chunks_case5() {
 #[test]
 fn test_delta_create_delta_file_equals_files_case1() {
     // Get file names
-    let prefix_file_name = format!("resources/test_create_delta_file_case2.{}", now_as_millis()); 
+    let prefix_file_name = format!("resources/test_create_delta_file_case1.{}", now_as_millis()); 
     let file_name = format!("{}.txt", prefix_file_name);
     let signature_file_name = format!("{}.sig", file_name);
     let new_file_name = format!("{}.v1.txt", prefix_file_name);
