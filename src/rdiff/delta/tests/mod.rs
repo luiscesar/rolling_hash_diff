@@ -4,7 +4,7 @@ use crate::rdiff::{hash::{strong::rdiff_sha1::RdiffSha1, weak::rdiff_addler::Rdi
 
 
 #[test]
-fn test_delta_generate_delta_case1() {
+fn test_delta_generate_delta_equals_files_case1() {
     // Get file names
     let prefix_file_name = format!("resources/test_generate_delta_case1.{}", now_as_millis()); 
     let file_name = format!("{}.txt", prefix_file_name);
@@ -76,7 +76,7 @@ fn test_delta_generate_delta_case1() {
 }
 
 #[test]
-fn test_delta_generate_delta_case2() {
+fn test_delta_generate_delta_chunk_removed_case2() {
     // Get file names
     let prefix_file_name = format!("resources/test_generate_delta_case2.{}", now_as_millis()); 
     let file_name = format!("{}.txt", prefix_file_name);
@@ -143,60 +143,224 @@ fn test_delta_generate_delta_case2() {
 }
 
 #[test]
-fn test_delta_generate_delta_case11() {
-    let file_name_new = "resources/test.v2.txt";
-    let file_name_old = "resources/test.txt";
-    let signature_file_name = "resources/test.sig";
-    let strong_hash_ptr = RdiffSha1::new_ptr();
-    let weak_hash_ptr = RdiffAddler::new_ptr();
-    let result = 
-        Signature::create_signature_file(file_name_old, signature_file_name, weak_hash_ptr, strong_hash_ptr).unwrap();
-    assert_eq!(result,());
-    let signature = 
-        Signature::get_signature_from_file(signature_file_name).unwrap();
-    let strong_hash_ptr = RdiffSha1::new_ptr();
-    let weak_hash_ptr = RdiffAddler::new_ptr();
-    let delta = Delta::generate_delta(file_name_new,signature,weak_hash_ptr,strong_hash_ptr).unwrap();
+fn test_delta_generate_delta_chunk_changed_case3() {
+    // Get file names
+    let prefix_file_name = format!("resources/test_generate_delta_case3.{}", now_as_millis()); 
+    let file_name = format!("{}.txt", prefix_file_name);
+    let signature_file_name = format!("{}.sig", file_name);
+    let new_file_name = format!("{}.v1.txt", prefix_file_name);
+    let delta_file_name = format!("{}.v1.txt.delta", prefix_file_name);
 
+    // Create old file
+    {
+        let file = File::create(file_name.as_str()).unwrap();                            
+        let mut writer = BufWriter::new(file);
+        let mut input_data:Vec<u8> = Vec::new();
+        for i in 0..BLOCK_SIZE {input_data.push(b'a');}
+        for i in 0..BLOCK_SIZE {input_data.push(b'b');}
+        for i in 0..BLOCK_SIZE-1 {input_data.push(b'c');}
+        let chunks = input_data.chunks(BLOCK_SIZE);
+        chunks.for_each(|x| {writer.write(x).unwrap();()});
+    }
+    // Create signature file
+    // Get hash functions for create signature file
+    let strong_hash_ptr = RdiffSha1::new_ptr();
+    let weak_hash_ptr = RdiffAddler::new_ptr();
+
+    // Create signature file
+    let result = 
+        Signature::create_signature_file(file_name.as_str(), 
+                                        signature_file_name.as_str(), 
+                                        weak_hash_ptr, 
+                                        strong_hash_ptr).unwrap();
+    assert_eq!(result,());
+
+    // Create new file version
+    // By changing first chunk
+    {
+        let file = File::create(new_file_name.as_str()).unwrap();                            
+        let mut writer = BufWriter::new(file);
+        let mut input_data:Vec<u8> = Vec::new();
+        for i in 0..BLOCK_SIZE {input_data.push(b'd');}
+        for i in 0..BLOCK_SIZE {input_data.push(b'b');}
+        for i in 0..BLOCK_SIZE-1 {input_data.push(b'c');}
+        let chunks = input_data.chunks(BLOCK_SIZE);
+        chunks.for_each(|x| {writer.write(x).unwrap();()});
+    }
+    // Compute Delta
+    // Get hash functions for Delta
+    let strong_hash_ptr = RdiffSha1::new_ptr();
+    let weak_hash_ptr = RdiffAddler::new_ptr();
+    
+    // Get signature from file
+    let signature = Signature::get_signature_from_file(signature_file_name.as_str()).unwrap();
+
+    // Get Delta
+    let delta = Delta::generate_delta(new_file_name.as_str(),signature,weak_hash_ptr,strong_hash_ptr).unwrap();
     println!("delta {:?}", delta);
+
+    // Set expected values
+    let mut chunk_delta_list:Vec<ChunkDelta> = Vec::new();
+    let mut differences:Vec<u8> = Vec::new();
+    for i in 0..BLOCK_SIZE {
+        differences.push(b'd');
+    }
+    chunk_delta_list.push(ChunkDelta::Diff(differences));
+    chunk_delta_list.push(ChunkDelta::Match(2)); 
+    chunk_delta_list.push(ChunkDelta::Match(3)); 
+    let expected_delta = Delta{chunk_delta_list};
+
+    // Verify computed values
+    assert_eq!(delta, expected_delta);
+
 }
 
 #[test]
-fn test_delta_generate_delta_case22() {
-    let file_name_new = "resources/poem.v2.txt";
-    let file_name_old = "resources/poem.txt";
-    let signature_file_name = "resources/poem.v2.sig";
-    let strong_hash_ptr = RdiffSha1::new_ptr();
-    let weak_hash_ptr = RdiffAddler::new_ptr();
-    let result = 
-        Signature::create_signature_file(file_name_old, signature_file_name, weak_hash_ptr, strong_hash_ptr).unwrap();
-    assert_eq!(result,());
-    let signature = 
-        Signature::get_signature_from_file(signature_file_name).unwrap();
-    let strong_hash_ptr = RdiffSha1::new_ptr();
-    let weak_hash_ptr = RdiffAddler::new_ptr();
-    let delta = Delta::generate_delta(file_name_new,signature,weak_hash_ptr,strong_hash_ptr).unwrap();
+fn test_delta_generate_delta_chunk_shifted_case4() {
+    // Get file names
+    let prefix_file_name = format!("resources/test_generate_delta_case4.{}", now_as_millis()); 
+    let file_name = format!("{}.txt", prefix_file_name);
+    let signature_file_name = format!("{}.sig", file_name);
+    let new_file_name = format!("{}.v1.txt", prefix_file_name);
+    let delta_file_name = format!("{}.v1.txt.delta", prefix_file_name);
 
+    // Create old file
+    {
+        let file = File::create(file_name.as_str()).unwrap();                            
+        let mut writer = BufWriter::new(file);
+        let mut input_data:Vec<u8> = Vec::new();
+        for i in 0..BLOCK_SIZE {input_data.push(b'a');}
+        for i in 0..BLOCK_SIZE {input_data.push(b'b');}
+        for i in 0..BLOCK_SIZE-1 {input_data.push(b'c');}
+        let chunks = input_data.chunks(BLOCK_SIZE);
+        chunks.for_each(|x| {writer.write(x).unwrap();()});
+    }
+    // Create signature file
+    // Get hash functions for create signature file
+    let strong_hash_ptr = RdiffSha1::new_ptr();
+    let weak_hash_ptr = RdiffAddler::new_ptr();
+
+    // Create signature file
+    let result = 
+        Signature::create_signature_file(file_name.as_str(), 
+                                        signature_file_name.as_str(), 
+                                        weak_hash_ptr, 
+                                        strong_hash_ptr).unwrap();
+    assert_eq!(result,());
+
+    // Create new file version
+    // By shifted first chunk
+    let shifted_size = 20;
+    {
+        let file = File::create(new_file_name.as_str()).unwrap();                            
+        let mut writer = BufWriter::new(file);
+        let mut input_data:Vec<u8> = Vec::new();
+        for i in 0..shifted_size {input_data.push(b'd');}
+        for i in 0..BLOCK_SIZE {input_data.push(b'a');}
+        for i in 0..BLOCK_SIZE {input_data.push(b'b');}
+        for i in 0..BLOCK_SIZE-1 {input_data.push(b'c');}
+        let chunks = input_data.chunks(BLOCK_SIZE);
+        chunks.for_each(|x| {writer.write(x).unwrap();()});
+    }
+    // Compute Delta
+    // Get hash functions for Delta
+    let strong_hash_ptr = RdiffSha1::new_ptr();
+    let weak_hash_ptr = RdiffAddler::new_ptr();
+    
+    // Get signature from file
+    let signature = Signature::get_signature_from_file(signature_file_name.as_str()).unwrap();
+
+    // Get Delta
+    let delta = Delta::generate_delta(new_file_name.as_str(),signature,weak_hash_ptr,strong_hash_ptr).unwrap();
     println!("delta {:?}", delta);
+
+    // Set expected values
+    let mut chunk_delta_list:Vec<ChunkDelta> = Vec::new();
+    let mut differences:Vec<u8> = Vec::new();
+    for i in 0..shifted_size {differences.push(b'd');}
+    chunk_delta_list.push(ChunkDelta::Diff(differences));
+    chunk_delta_list.push(ChunkDelta::Match(1)); 
+    chunk_delta_list.push(ChunkDelta::Match(2)); 
+    chunk_delta_list.push(ChunkDelta::Match(3)); 
+    let expected_delta = Delta{chunk_delta_list};
+
+    // Verify computed values
+    assert_eq!(delta, expected_delta);
+
 }
 
 #[test]
-fn test_delta_generate_delta_case3() {
-    let file_name_new = "resources/poem.v3.txt";
-    let file_name_old = "resources/poem.txt";
-    let signature_file_name = "resources/poem.v3.sig";
-    let strong_hash_ptr = RdiffSha1::new_ptr();
-    let weak_hash_ptr = RdiffAddler::new_ptr();
-    let result = 
-        Signature::create_signature_file(file_name_old, signature_file_name, weak_hash_ptr, strong_hash_ptr).unwrap();
-    assert_eq!(result,());
-    let signature = 
-        Signature::get_signature_from_file(signature_file_name).unwrap();
-    let strong_hash_ptr = RdiffSha1::new_ptr();
-    let weak_hash_ptr = RdiffAddler::new_ptr();
-    let delta = Delta::generate_delta(file_name_new,signature,weak_hash_ptr,strong_hash_ptr).unwrap();
+fn test_delta_generate_delta_addition_between_chunks_case5() {
+    // Get file names
+    let prefix_file_name = format!("resources/test_generate_delta_case5.{}", now_as_millis()); 
+    let file_name = format!("{}.txt", prefix_file_name);
+    let signature_file_name = format!("{}.sig", file_name);
+    let new_file_name = format!("{}.v1.txt", prefix_file_name);
+    let delta_file_name = format!("{}.v1.txt.delta", prefix_file_name);
 
+    // Create old file
+    {
+        let file = File::create(file_name.as_str()).unwrap();                            
+        let mut writer = BufWriter::new(file);
+        let mut input_data:Vec<u8> = Vec::new();
+        for i in 0..BLOCK_SIZE {input_data.push(b'a');}
+        for i in 0..BLOCK_SIZE {input_data.push(b'b');}
+        for i in 0..BLOCK_SIZE-1 {input_data.push(b'c');}
+        let chunks = input_data.chunks(BLOCK_SIZE);
+        chunks.for_each(|x| {writer.write(x).unwrap();()});
+    }
+    // Create signature file
+    // Get hash functions for create signature file
+    let strong_hash_ptr = RdiffSha1::new_ptr();
+    let weak_hash_ptr = RdiffAddler::new_ptr();
+
+    // Create signature file
+    let result = 
+        Signature::create_signature_file(file_name.as_str(), 
+                                        signature_file_name.as_str(), 
+                                        weak_hash_ptr, 
+                                        strong_hash_ptr).unwrap();
+    assert_eq!(result,());
+
+    // Create new file version
+    // By shifted first chunk
+    let addition_size = 30;
+    {
+        let file = File::create(new_file_name.as_str()).unwrap();                            
+        let mut writer = BufWriter::new(file);
+        let mut input_data:Vec<u8> = Vec::new();
+        for i in 0..BLOCK_SIZE {input_data.push(b'a');}
+        for i in 0..addition_size {input_data.push(b'd');}
+        for i in 0..BLOCK_SIZE {input_data.push(b'b');}
+        for i in 0..BLOCK_SIZE-1 {input_data.push(b'c');}
+        let chunks = input_data.chunks(BLOCK_SIZE);
+        chunks.for_each(|x| {writer.write(x).unwrap();()});
+    }
+    // Compute Delta
+    // Get hash functions for Delta
+    let strong_hash_ptr = RdiffSha1::new_ptr();
+    let weak_hash_ptr = RdiffAddler::new_ptr();
+    
+    // Get signature from file
+    let signature = Signature::get_signature_from_file(signature_file_name.as_str()).unwrap();
+
+    // Get Delta
+    let delta = Delta::generate_delta(new_file_name.as_str(),signature,weak_hash_ptr,strong_hash_ptr).unwrap();
     println!("delta {:?}", delta);
+
+    // Set expected values
+    let mut chunk_delta_list:Vec<ChunkDelta> = Vec::new();
+    let mut differences:Vec<u8> = Vec::new();
+    for i in 0..addition_size {differences.push(b'd');}
+    chunk_delta_list.push(ChunkDelta::Match(1)); 
+    chunk_delta_list.push(ChunkDelta::Diff(differences));
+    chunk_delta_list.push(ChunkDelta::Match(2)); 
+    chunk_delta_list.push(ChunkDelta::Match(3)); 
+    let expected_delta = Delta{chunk_delta_list};
+
+    // Verify computed values
+    assert_eq!(delta, expected_delta);
+
 }
 
 #[test]
