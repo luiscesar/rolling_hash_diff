@@ -1,4 +1,4 @@
-use std::{fs::File, io::{BufWriter, BufReader}};
+use std::{fs::File, io::{BufWriter, BufReader}, fmt::Display};
 
 use bincode::{serialize_into, deserialize_from};
 use serde::{Serialize, Deserialize};
@@ -6,7 +6,7 @@ use serde::{Serialize, Deserialize};
 use super::{hash::{weak::WeakHashPtr, strong::StrongHashPtr}, error::RdiffError, io::RdiffFile, chunk::{RdiffChunkTable, RdiffChunkDigest, iterator::{BufferedRdiffChunkIterator, RdiffChunkIterator}}};
 
 
-#[derive(Debug,Serialize,Deserialize)]
+#[derive(Debug,PartialEq,Serialize,Deserialize)]
 pub struct Signature {
     rdiff_chunk_table:RdiffChunkTable,
     chunk_size:usize,
@@ -106,5 +106,11 @@ impl Signature {
     }
 }
 
+impl Display for Signature {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+         write!(f, "rdiff_chunk_table:{:?},\nchunk_size:{},\nlast_chunk_size:{}",
+            self.rdiff_chunk_table,self.chunk_size,self.last_chunk_size)
+    }
+}
 #[cfg(test)]
 mod tests;
