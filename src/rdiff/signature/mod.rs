@@ -8,13 +8,30 @@ use super::{hash::{weak::WeakHashPtr, strong::StrongHashPtr}, error::RdiffError,
 
 #[derive(Debug,Serialize,Deserialize)]
 pub struct Signature {
-    pub rdiff_chunk_table:RdiffChunkTable,
-    pub chunk_size:usize,
-    pub last_chunk_size:usize,
+    rdiff_chunk_table:RdiffChunkTable,
+    chunk_size:usize,
+    last_chunk_size:usize,
 }
 
 impl Signature {
-   
+    
+    pub fn new(rdiff_chunk_table:RdiffChunkTable, 
+                chunk_size:usize, last_chunk_size:usize) -> Signature {
+            Signature { rdiff_chunk_table, chunk_size, last_chunk_size}
+    }
+
+    pub fn get_rdiff_chunk_table(&self) -> &RdiffChunkTable {
+        &self.rdiff_chunk_table
+    }
+
+    pub fn get_chunk_size(&self) -> usize {
+        self.chunk_size
+    }
+
+    pub fn get_last_chunk_size(&self) -> usize {
+        self.last_chunk_size
+    }
+
     pub fn create_signature_file(file_name:&str,
                                 signature_file_name:&str,
                                 weak_hash_ptr:WeakHashPtr,

@@ -2,8 +2,7 @@ use rolling_hash_diff::rdiff::Rdiff;
 
 const COMMAND:&str = "rolling_hash_diff";
 
-#[test]
-fn integration_test_rdiff_main_signature_case1() {
+pub fn integration_test_rdiff_main_signature_case1() {
     // Create signature
     let file_name = "resources/test.txt";
     let signature_file_name = "resources/test.sig";
@@ -16,8 +15,7 @@ fn integration_test_rdiff_main_signature_case1() {
     let rdiff_main_result = Rdiff::main_rdiff(args).unwrap();
 }
 
-#[test]
-fn integration_test_rdiff_main_delta_case1() {
+pub fn integration_test_rdiff_main_delta_case1() {
     // Create signature
     let file_name = "resources/test.txt";
     let signature_file_name = "resources/test_delta.sig";

@@ -90,6 +90,7 @@ impl RdiffChunkIterator for BufferedRdiffChunkIterator {
             }
         }
     }
+
 }
 
 #[cfg(test)]

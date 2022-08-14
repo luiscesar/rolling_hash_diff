@@ -4,7 +4,7 @@ use std::{fs::File, io::BufWriter};
 use bincode::serialize_into;
 use serde::{Serialize, Deserialize};
 
-use super::{error::RdiffError, signature::Signature, hash::{weak::WeakHashPtr, strong::StrongHashPtr}, io::RdiffFile, chunk::iterator::BufferedRdiffChunkIterator};
+use super::{error::{RdiffError, RollingHashError, messages::DELTA_PROCESSED_DATA_SIZE_ERROR}, signature::Signature, hash::{weak::WeakHashPtr, strong::StrongHashPtr}, io::RdiffFile, chunk::iterator::BufferedRdiffChunkIterator};
 use super::chunk::iterator::RdiffChunkIterator;
 
 #[derive(Debug,Serialize,Deserialize)]
@@ -44,15 +44,19 @@ impl Delta {
         
         // Get rdiff file from input file given by filename
         let rdiff_file = RdiffFile::new(file_name)?;
+        // Get file size
+        let file_size = rdiff_file.size();
         // Get rdiff chunk iterator
         let mut iterator:BufferedRdiffChunkIterator = 
-            BufferedRdiffChunkIterator::new_with_chunk_size(signature.chunk_size,rdiff_file)?;
+            BufferedRdiffChunkIterator::new_with_chunk_size(signature.get_chunk_size(),rdiff_file)?;
         // Init chunk delta list
         let mut chunk_delta_list:Vec<ChunkDelta> = Vec::new();
         // Init memory buffer
         let mut buffer:Vec<u8> = Vec::new();
         // Set chunk size using the signature chunk size
-        let chunk_size = signature.chunk_size;
+        let chunk_size = signature.get_chunk_size();
+        // Init processed data size
+        let mut processed_data_size:usize = 0;
         // Loop until the input file has been processed
         'chunk: loop {
             // Get next chunk from iterator
@@ -66,18 +70,22 @@ impl Delta {
                 // If it is the last chunk
                 if buffer.len() < chunk_size {
                     // Check for last chunk match
-                    if buffer.len() == signature.last_chunk_size {
+                    if buffer.len() == signature.get_last_chunk_size() {
                         let last_chunk = &buffer[..];
                         // If last chunk is a match
                         if let Some(chunk_delta) = 
                             Delta::get_chunk_delta_match(&signature, &weak_hash_ptr, &strong_hash_ptr, last_chunk) {
                             // Add last chunk as a chunk delta match
                             chunk_delta_list.push(chunk_delta);
+                            // Update processed data size
+                            processed_data_size += last_chunk.len();
                             // No more data to process, the chunk' loop stops
                             break;
                         }
                     }
                     // If there is not chunk delta match,
+                    // Update processed data size
+                    processed_data_size += buffer.len();
                     // Update chunk delta list with buffer as chunk delta differences
                     chunk_delta_list.push(ChunkDelta::Diff(buffer));
                     // Chunk' loop stops 
@@ -90,6 +98,8 @@ impl Delta {
                         Delta::get_chunk_delta_match(&signature, &weak_hash_ptr, &strong_hash_ptr, chunk) {
                         // Add chunk as a match chunk delta
                         chunk_delta_list.push(chunk_delta);
+                        // Update processed data size
+                        processed_data_size += chunk.len();
                         // Update buffer by removing that chunk
                         buffer.drain(..chunk_size);
                         // Get the next chunk, continue 'chunk loop
@@ -105,8 +115,10 @@ impl Delta {
                         let diff_byte = buffer.remove(0);
                         // Update byte differences list
                         differences.push(diff_byte);
-                         // If buffer is not big enough 
-                        if buffer.len() < chunk_size {
+                        // If buffer is not big enough and there is more data 
+                        // to be buffered
+                        if (buffer.len() < chunk_size) && 
+                            (processed_data_size + differences.len() + buffer.len() < file_size) {
                             // Get next chunk from iterator
                             let rdiff_chunk_result = iterator.next_chunk()?;
                             if let Some(mut chunk) = rdiff_chunk_result {
@@ -122,8 +134,12 @@ impl Delta {
                             // If the chunk is a chunk delta match
                             if let Some(chunk_delta) = 
                                 Delta::get_chunk_delta_match(&signature, &weak_hash_ptr, &strong_hash_ptr, chunk) {
+                                // Update processed data size with differences size
+                                processed_data_size += differences.len();
                                 // Add differences to chunck delta list
                                 chunk_delta_list.push(ChunkDelta::Diff(differences));
+                                // Update processed data size with chunk size
+                                processed_data_size += chunk.len();
                                 // Add chunk delta match to chunk delta list
                                 chunk_delta_list.push(chunk_delta);
                                 // Update buffer by removing that chunk
@@ -136,13 +152,17 @@ impl Delta {
                         } else {
                             // if there are no more chunks
                              // Check for last chunk
-                            if buffer.len() == signature.last_chunk_size {
-                                let last_chunk = &buffer[..signature.last_chunk_size];
+                            if buffer.len() == signature.get_last_chunk_size() {
+                                let last_chunk = &buffer[..signature.get_last_chunk_size()];
                                 // If last chunk is a chunk delta match
                                 if let Some(chunk_delta) = 
                                     Delta::get_chunk_delta_match(&signature, &weak_hash_ptr, &strong_hash_ptr, last_chunk) {
+                                    // Update processed data size with differences size
+                                    processed_data_size += differences.len();
                                     // Add differences to chunck delta list
                                     chunk_delta_list.push(ChunkDelta::Diff(differences));
+                                    // Update processed data size with last chunk size
+                                    processed_data_size += last_chunk.len();
                                     // Add chunk delta match to chunk delta list
                                     chunk_delta_list.push(chunk_delta);
                                     // No more data to process, loop 'chunk stops
@@ -152,6 +172,8 @@ impl Delta {
                             // If there is no match with last chunk
                             // Update difference list with buffer
                             differences.append(&mut buffer);
+                            // Update processed data size with differences size
+                            processed_data_size += differences.len();
                             // Add differences to chunck delta list
                             chunk_delta_list.push(ChunkDelta::Diff(differences));
                             // Loop 'chunk stops
@@ -163,6 +185,9 @@ impl Delta {
                 // If there is no more data process, loop stops
                 break;
             }
+        }
+        if processed_data_size != file_size {
+            return Err(RollingHashError::rdiff_error(DELTA_PROCESSED_DATA_SIZE_ERROR))
         }
         Ok(Delta{chunk_delta_list})
     }
@@ -177,7 +202,7 @@ impl Delta {
         let checksum = weak_hash_ptr.checksum(chunk);
         // If the checksum exists in chunk table
         if let Some(chunk_digest_list) = 
-            signature.rdiff_chunk_table.chunk_table.get(&checksum) {
+            signature.get_rdiff_chunk_table().chunk_table.get(&checksum) {
                 // Get chunk digest
                 let digest = strong_hash_ptr.digest(chunk);
                 // If chunk digest exists in chunk table

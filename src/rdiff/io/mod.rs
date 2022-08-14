@@ -19,7 +19,10 @@ impl RdiffFile {
         Ok(RdiffFile{reader:reader,name:String::from(filename),size:size})
     } 
 
-    pub fn size(&self) -> usize {self.size as usize}
+    pub fn size(&self) -> usize {
+        let size = self.size as usize;
+        size
+    }
     
     pub fn read_byte(&mut self) -> Option<u8> {
         let mut buffer = [0;1];
