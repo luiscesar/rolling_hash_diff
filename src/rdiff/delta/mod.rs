@@ -7,13 +7,13 @@ use serde::{Serialize, Deserialize};
 use super::{error::{RdiffError, RollingHashError, messages::DELTA_PROCESSED_DATA_SIZE_ERROR}, signature::Signature, hash::{weak::WeakHashPtr, strong::StrongHashPtr}, io::RdiffFile, chunk::iterator::BufferedRdiffChunkIterator};
 use super::chunk::iterator::RdiffChunkIterator;
 
-#[derive(Debug,Serialize,Deserialize)]
+#[derive(Debug,PartialEq,Serialize,Deserialize)]
 pub enum ChunkDelta {
     Match(u32),
     Diff(Vec<u8>),
 }
 
-#[derive(Debug,Serialize,Deserialize)]
+#[derive(Debug,PartialEq,Serialize,Deserialize)]
 pub struct Delta {
     chunk_delta_list:Vec<ChunkDelta>,
 }
