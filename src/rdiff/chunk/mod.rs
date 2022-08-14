@@ -17,7 +17,7 @@ pub struct RdiffChunkDigest {
 
 #[derive(Debug,Serialize,Deserialize)]
 pub struct RdiffChunkTable {
-    pub chunk_table:HashMap<RdiffChecksum,Vec<RdiffChunkDigest>>,
+    pub(crate) chunk_table:HashMap<RdiffChecksum,Vec<RdiffChunkDigest>>,
 }
 
 impl RdiffChunkTable {
