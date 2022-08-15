@@ -40,12 +40,10 @@ fn test_rdiff_chunk_iterator_buffered_get_rdiff_chunk_case1() {
       match result {
          Some(rdiff_chunk) => {
             number_of_chunks += 1;
-            println!("rdiff_chunk {:?}", rdiff_chunk)
          },
          None => break,
       }
    }
-   println!("number_of_chunks {}", number_of_chunks);
    assert!(number_of_chunks >= 2);
 }
 
@@ -60,12 +58,10 @@ fn test_rdiff_chunk_iterator_buffered_get_rdiff_chunk_case2() {
       match result {
          Some(rdiff_chunk) => {
             number_of_chunks += 1;
-            println!("rdiff_chunk {:?}", rdiff_chunk)
          },
          None => break,
       }
    }
-   println!("number_of_chunks {}", number_of_chunks);
    assert!(number_of_chunks >= 2);
 }
 
@@ -80,12 +76,10 @@ fn test_rdiff_chunk_iterator_buffered_get_rdiff_chunk_case3() {
       match result {
          Some(rdiff_chunk) => {
             number_of_chunks += 1;
-            println!("rdiff_chunk {:?}", rdiff_chunk)
          },
          None => break,
       }
    }
-   println!("number_of_chunks {}", number_of_chunks);
    assert!(number_of_chunks >= 2);
 }
 
@@ -100,12 +94,10 @@ fn test_rdiff_chunk_iterator_buffered_get_rdiff_chunk_case4() {
       match result {
          Some(rdiff_chunk) => {
             number_of_chunks += 1;
-            println!("rdiff_chunk {:?}", rdiff_chunk)
          },
          None => break,
       }
    }
-   println!("number_of_chunks {}", number_of_chunks);
    assert!(number_of_chunks >= 2);
 }
 
@@ -137,10 +129,8 @@ fn test_rdiff_chunk_iterator_buffered_with_chunk_size_next_chunk_case1() {
       match result {
          Some(rdiff_chunk) => {
             number_of_chunks += 1;
-            println!("rdiff_chunk {:?}", rdiff_chunk)
          },
          None => break,
       }
    }
-   println!("number_of_chunks {}", number_of_chunks);
 }

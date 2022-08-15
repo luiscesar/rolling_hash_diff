@@ -30,7 +30,6 @@ fn test_rdiff_signature_create_signature_case1() {
         Signature::create_signature(file_name.as_str(),weak_hash_ptr,strong_hash_ptr).unwrap();
 
     // Show signature
-    println!("signature {:}", signature);
     let expected_chunk_size = compute_chunk_size(file_size);
     let expected_number_of_chunks:usize = 
         (((file_size as f64) / (expected_chunk_size as f64)).trunc()) as usize;
@@ -62,7 +61,6 @@ fn test_rdiff_signature_create_signature_case2() {
         Signature::create_signature(file_name.as_str(),weak_hash_ptr,strong_hash_ptr).unwrap();
 
     // Show signature
-    println!("signature {:}", signature);
     let expected_chunk_size = compute_chunk_size(file_size);
     let expected_number_of_chunks:usize = 
         (((file_size as f64) / (expected_chunk_size as f64)).trunc()) as usize;

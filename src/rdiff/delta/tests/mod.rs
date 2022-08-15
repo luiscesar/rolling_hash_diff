@@ -47,7 +47,6 @@ fn test_delta_generate_delta_equals_files_case1() {
         let mut buffer: [u8; BLOCK_SIZE as usize] = [0; BLOCK_SIZE as usize];
         loop {
             let size = reader.read(&mut buffer).unwrap();
-            println!("buffer {:?}", &buffer[0..size]);
             writer.write(&buffer[..size]).unwrap();
             if size == 0 {break;}
         }
@@ -62,7 +61,6 @@ fn test_delta_generate_delta_equals_files_case1() {
 
     // Get Delta
     let delta = Delta::generate_delta(new_file_name.as_str(),signature,weak_hash_ptr,strong_hash_ptr).unwrap();
-    println!("delta {:?}", delta);
 
     // Set expected values
     let mut chunk_delta_list:Vec<ChunkDelta> = Vec::new();
@@ -129,7 +127,6 @@ fn test_delta_generate_delta_chunk_removed_case2() {
 
     // Get Delta
     let delta = Delta::generate_delta(new_file_name.as_str(),signature,weak_hash_ptr,strong_hash_ptr).unwrap();
-    println!("delta {:?}", delta);
 
     // Set expected values
     let mut chunk_delta_list:Vec<ChunkDelta> = Vec::new();
@@ -196,7 +193,6 @@ fn test_delta_generate_delta_chunk_changed_case3() {
 
     // Get Delta
     let delta = Delta::generate_delta(new_file_name.as_str(),signature,weak_hash_ptr,strong_hash_ptr).unwrap();
-    println!("delta {:?}", delta);
 
     // Set expected values
     let mut chunk_delta_list:Vec<ChunkDelta> = Vec::new();
@@ -270,7 +266,6 @@ fn test_delta_generate_delta_chunk_shifted_case4() {
 
     // Get Delta
     let delta = Delta::generate_delta(new_file_name.as_str(),signature,weak_hash_ptr,strong_hash_ptr).unwrap();
-    println!("delta {:?}", delta);
 
     // Set expected values
     let mut chunk_delta_list:Vec<ChunkDelta> = Vec::new();
@@ -333,7 +328,7 @@ fn test_delta_generate_delta_addition_between_chunks_case5() {
         let chunks = input_data.chunks(BLOCK_SIZE);
         chunks.for_each(|x| {writer.write(x).unwrap();()});
     }
-    
+
     // Compute Delta
     // Get hash functions for Delta
     let strong_hash_ptr = RdiffSha1::new_ptr();
@@ -344,7 +339,6 @@ fn test_delta_generate_delta_addition_between_chunks_case5() {
 
     // Get Delta
     let delta = Delta::generate_delta(new_file_name.as_str(),signature,weak_hash_ptr,strong_hash_ptr).unwrap();
-    println!("delta {:?}", delta);
 
     // Set expected values
     let mut chunk_delta_list:Vec<ChunkDelta> = Vec::new();
@@ -404,7 +398,6 @@ fn test_delta_create_delta_file_equals_files_case1() {
         let mut buffer: [u8; BLOCK_SIZE as usize] = [0; BLOCK_SIZE as usize];
         loop {
             let size = reader.read(&mut buffer).unwrap();
-            println!("buffer {:?}", &buffer[0..size]);
             writer.write(&buffer[..size]).unwrap();
             if size == 0 {break;}
         }

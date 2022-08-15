@@ -19,5 +19,5 @@ fn test_rdiff_error_case1() {
 fn test_rdiff_error_case2() {
     let rdiff_error = RollingHashError::rdiff_error(HELP_USAGE);
     assert_eq!(rdiff_error.to_string(),HELP_USAGE);
-    println!("{}",HELP_USAGE);
+    eprintln!("{}",HELP_USAGE);
 }
