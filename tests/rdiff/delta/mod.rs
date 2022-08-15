@@ -1,7 +1,7 @@
 use std::{fs::File, io::{BufWriter, Write, BufReader, Read}};
 
 use bincode::deserialize_from;
-use rolling_hash_diff::rdiff::{Rdiff, constants::BLOCK_SIZE, delta::{Delta, ChunkDelta}};
+use rolling_hash_diff::rdiff::{Rdiff, constants::BLOCK_SIZE, delta::{Delta, ChunkDelta}, error::messages::HELP_USAGE};
 
 use crate::rdiff::{COMMAND, util::now_as_millis};
 
@@ -376,4 +376,50 @@ pub fn integration_test_rdiff_main_delta_addition_between_chunks_case5() {
 
     // Verify computed values
     assert_eq!(delta, expected_delta);
+}
+
+#[test]
+fn integration_test_rdiff_main_delta_error_no_option_case1() {
+    // Get file names
+    let prefix_file_name = format!("resources/test_main_delta_file_case5.{}", now_as_millis()); 
+    let file_name = format!("{}.txt", prefix_file_name);
+    let signature_file_name = format!("{}.sig", file_name);
+    let new_file_name = format!("{}.v1.txt", prefix_file_name);
+    let delta_file_name = format!("{}.v1.txt.delta", prefix_file_name);
+
+    // Execute command
+    let option = "delta";
+    let mut args:Vec<String> = Vec::new();
+    args.push(COMMAND.to_string());
+    //args.push(option.to_string());
+    args.push(signature_file_name.to_string());
+    args.push(new_file_name.to_string());
+    args.push(delta_file_name.to_string());
+    let rdiff_main_result = Rdiff::main_rdiff(args).unwrap_err();
+    
+    // Verify result
+    assert_eq!(rdiff_main_result.to_string(), HELP_USAGE);
+}
+
+#[test]
+fn integration_test_rdiff_main_delta_error_file_name_missing_case2() {
+    // Get file names
+    let prefix_file_name = format!("resources/test_main_delta_file_case5.{}", now_as_millis()); 
+    let file_name = format!("{}.txt", prefix_file_name);
+    let signature_file_name = format!("{}.sig", file_name);
+    let new_file_name = format!("{}.v1.txt", prefix_file_name);
+    let delta_file_name = format!("{}.v1.txt.delta", prefix_file_name);
+
+    // Execute command
+    let option = "delta";
+    let mut args:Vec<String> = Vec::new();
+    args.push(COMMAND.to_string());
+    args.push(option.to_string());
+    //args.push(signature_file_name.to_string());
+    args.push(new_file_name.to_string());
+    args.push(delta_file_name.to_string());
+    let rdiff_main_result = Rdiff::main_rdiff(args).unwrap_err();
+    
+    // Verify result
+    assert_eq!(rdiff_main_result.to_string(), HELP_USAGE);
 }
