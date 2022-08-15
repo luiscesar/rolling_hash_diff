@@ -61,6 +61,8 @@ pub fn integration_test_rdiff_main_delta_equals_files_case1() {
     args.push(delta_file_name.to_string());
     let rdiff_main_result = Rdiff::main_rdiff(args).unwrap();
     assert_eq!(rdiff_main_result, ());
+
+    
 }
 
 #[test]

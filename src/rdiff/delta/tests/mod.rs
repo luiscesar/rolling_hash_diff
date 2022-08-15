@@ -423,7 +423,8 @@ fn test_delta_create_delta_file_equals_files_case1() {
     // Get computed Delta from file
     let delta_file = File::open(delta_file_name.as_str()).unwrap(); 
     let reader = BufReader::new(delta_file);
-    // Get signature from file
+
+    // Get delta from file
     let delta: Delta = deserialize_from(reader).unwrap();
 
     // Set expected values
@@ -501,7 +502,7 @@ fn test_delta_create_delta_file_chunk_removed_case2() {
     // Get computed Delta from file
     let delta_file = File::open(delta_file_name.as_str()).unwrap(); 
     let reader = BufReader::new(delta_file);
-    // Get signature from file
+    // Get Delta from file
     let delta: Delta = deserialize_from(reader).unwrap();
 
     // Set expected values
@@ -580,7 +581,7 @@ fn test_delta_create_delta_file_chunk_changed_case3() {
     // Get computed Delta from file
     let delta_file = File::open(delta_file_name.as_str()).unwrap(); 
     let reader = BufReader::new(delta_file);
-    // Get signature from file
+    // Get Delta from file
     let delta: Delta = deserialize_from(reader).unwrap();
 
     // Set expected values
@@ -661,7 +662,7 @@ fn test_delta_create_delta_file_chunk_shifted_case4() {
     // Get computed Delta from file
     let delta_file = File::open(delta_file_name.as_str()).unwrap(); 
     let reader = BufReader::new(delta_file);
-    // Get signature from file
+    // Get Delta from file
     let delta: Delta = deserialize_from(reader).unwrap();
 
     // Set expected values
@@ -742,7 +743,7 @@ fn test_delta_create_delta_file_addition_between_chunks_case5() {
     // Get computed Delta from file
     let delta_file = File::open(delta_file_name.as_str()).unwrap(); 
     let reader = BufReader::new(delta_file);
-    // Get signature from file
+    // Get Delta from file
     let delta: Delta = deserialize_from(reader).unwrap();
 
     // Set expected values
