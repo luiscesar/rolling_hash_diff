@@ -1,6 +1,7 @@
 use std::{fs::File, io::{BufWriter, Write, BufReader, Read}};
 
-use rolling_hash_diff::rdiff::{Rdiff, constants::BLOCK_SIZE};
+use bincode::deserialize_from;
+use rolling_hash_diff::rdiff::{Rdiff, constants::BLOCK_SIZE, delta::{Delta, ChunkDelta}};
 
 use crate::rdiff::{COMMAND, util::now_as_millis};
 
@@ -62,7 +63,21 @@ pub fn integration_test_rdiff_main_delta_equals_files_case1() {
     let rdiff_main_result = Rdiff::main_rdiff(args).unwrap();
     assert_eq!(rdiff_main_result, ());
 
-    
+    // Get computed Delta from file
+    let delta_file = File::open(delta_file_name.as_str()).unwrap(); 
+    let reader = BufReader::new(delta_file);
+    let delta: Delta = deserialize_from(reader).unwrap();
+
+    // Set expected values
+    let mut chunk_delta_list:Vec<ChunkDelta> = Vec::new();
+    chunk_delta_list.push(ChunkDelta::Match(1)); 
+    chunk_delta_list.push(ChunkDelta::Match(2)); 
+    chunk_delta_list.push(ChunkDelta::Match(3)); 
+    let expected_delta = Delta::new(chunk_delta_list);
+
+    // Verify computed values
+    assert_eq!(delta, expected_delta);
+
 }
 
 #[test]
@@ -118,6 +133,21 @@ pub fn integration_test_rdiff_main_delta_chunk_removed_case2() {
     args.push(delta_file_name.to_string());
     let rdiff_main_result = Rdiff::main_rdiff(args).unwrap();
     assert_eq!(rdiff_main_result, ());
+
+    // Get computed Delta from file
+    let delta_file = File::open(delta_file_name.as_str()).unwrap(); 
+    let reader = BufReader::new(delta_file);
+    let delta: Delta = deserialize_from(reader).unwrap();
+
+    // Set expected values
+    let mut chunk_delta_list:Vec<ChunkDelta> = Vec::new();
+    chunk_delta_list.push(ChunkDelta::Match(1)); 
+    chunk_delta_list.push(ChunkDelta::Match(3)); 
+    let expected_delta = Delta::new(chunk_delta_list);
+
+    // Verify computed values
+    assert_eq!(delta, expected_delta);
+
 }
 
 #[test]
@@ -152,14 +182,12 @@ pub fn integration_test_rdiff_main_delta_chunk_changed_case3() {
     assert_eq!(rdiff_main_result, ());
 
     // Create new file version
-    // By addition between chunks
-    let addition_size = 30;
+    // By changing first chunk
     {
         let file = File::create(new_file_name.as_str()).unwrap();                            
         let mut writer = BufWriter::new(file);
         let mut input_data:Vec<u8> = Vec::new();
-        for i in 0..BLOCK_SIZE {input_data.push(b'a');}
-        for i in 0..addition_size {input_data.push(b'd');}
+        for i in 0..BLOCK_SIZE {input_data.push(b'd');}
         for i in 0..BLOCK_SIZE {input_data.push(b'b');}
         for i in 0..BLOCK_SIZE-1 {input_data.push(b'c');}
         let chunks = input_data.chunks(BLOCK_SIZE);
@@ -176,6 +204,26 @@ pub fn integration_test_rdiff_main_delta_chunk_changed_case3() {
     args.push(delta_file_name.to_string());
     let rdiff_main_result = Rdiff::main_rdiff(args).unwrap();
     assert_eq!(rdiff_main_result, ());
+
+    // Get computed Delta from file
+    let delta_file = File::open(delta_file_name.as_str()).unwrap(); 
+    let reader = BufReader::new(delta_file);
+    let delta: Delta = deserialize_from(reader).unwrap();
+
+    // Set expected values
+    let mut chunk_delta_list:Vec<ChunkDelta> = Vec::new();
+    let mut differences:Vec<u8> = Vec::new();
+    for i in 0..BLOCK_SIZE {
+        differences.push(b'd');
+    }
+    chunk_delta_list.push(ChunkDelta::Diff(differences));
+    chunk_delta_list.push(ChunkDelta::Match(2)); 
+    chunk_delta_list.push(ChunkDelta::Match(3)); 
+    let expected_delta = Delta::new(chunk_delta_list);
+
+    // Verify computed values
+    assert_eq!(delta, expected_delta);
+
 }
 
 #[test]
@@ -234,6 +282,24 @@ pub fn integration_test_rdiff_main_delta_chunk_shifted_case4() {
     args.push(delta_file_name.to_string());
     let rdiff_main_result = Rdiff::main_rdiff(args).unwrap();
     assert_eq!(rdiff_main_result, ());
+
+    // Get computed Delta from file
+    let delta_file = File::open(delta_file_name.as_str()).unwrap(); 
+    let reader = BufReader::new(delta_file);
+    let delta: Delta = deserialize_from(reader).unwrap();
+
+    // Set expected values
+    let mut chunk_delta_list:Vec<ChunkDelta> = Vec::new();
+    let mut differences:Vec<u8> = Vec::new();
+    for i in 0..shifted_size {differences.push(b'd');}
+    chunk_delta_list.push(ChunkDelta::Diff(differences));
+    chunk_delta_list.push(ChunkDelta::Match(1)); 
+    chunk_delta_list.push(ChunkDelta::Match(2)); 
+    chunk_delta_list.push(ChunkDelta::Match(3));  
+    let expected_delta = Delta::new(chunk_delta_list);
+
+    // Verify computed values
+    assert_eq!(delta, expected_delta);
 }
 
 #[test]
@@ -268,14 +334,14 @@ pub fn integration_test_rdiff_main_delta_addition_between_chunks_case5() {
     assert_eq!(rdiff_main_result, ());
 
     // Create new file version
-    // By shifted first chunk
-    let shifted_size = 20;
+    // By addition between chunks
+    let addition_size = 30;
     {
         let file = File::create(new_file_name.as_str()).unwrap();                            
         let mut writer = BufWriter::new(file);
         let mut input_data:Vec<u8> = Vec::new();
-        for i in 0..shifted_size {input_data.push(b'd');}
         for i in 0..BLOCK_SIZE {input_data.push(b'a');}
+        for i in 0..addition_size {input_data.push(b'd');}
         for i in 0..BLOCK_SIZE {input_data.push(b'b');}
         for i in 0..BLOCK_SIZE-1 {input_data.push(b'c');}
         let chunks = input_data.chunks(BLOCK_SIZE);
@@ -292,4 +358,22 @@ pub fn integration_test_rdiff_main_delta_addition_between_chunks_case5() {
     args.push(delta_file_name.to_string());
     let rdiff_main_result = Rdiff::main_rdiff(args).unwrap();
     assert_eq!(rdiff_main_result, ());
+
+    // Get computed Delta from file
+    let delta_file = File::open(delta_file_name.as_str()).unwrap(); 
+    let reader = BufReader::new(delta_file);
+    let delta: Delta = deserialize_from(reader).unwrap();
+
+    // Set expected values
+    let mut chunk_delta_list:Vec<ChunkDelta> = Vec::new();
+    let mut differences:Vec<u8> = Vec::new();
+    for i in 0..addition_size {differences.push(b'd');}
+    chunk_delta_list.push(ChunkDelta::Match(1)); 
+    chunk_delta_list.push(ChunkDelta::Diff(differences));
+    chunk_delta_list.push(ChunkDelta::Match(2)); 
+    chunk_delta_list.push(ChunkDelta::Match(3));  
+    let expected_delta = Delta::new(chunk_delta_list);
+
+    // Verify computed values
+    assert_eq!(delta, expected_delta);
 }

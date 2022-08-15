@@ -19,6 +19,11 @@ pub struct Delta {
 }
 
 impl Delta {
+    
+    pub fn new(chunk_delta_list:Vec<ChunkDelta>) -> Delta {
+        Delta{chunk_delta_list}
+    }
+
     pub fn create_delta_file(file_name:&str,
                             delta_file_name:&str,
                             signature_file_name:&str,

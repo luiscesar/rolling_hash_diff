@@ -333,6 +333,7 @@ fn test_delta_generate_delta_addition_between_chunks_case5() {
         let chunks = input_data.chunks(BLOCK_SIZE);
         chunks.for_each(|x| {writer.write(x).unwrap();()});
     }
+    
     // Compute Delta
     // Get hash functions for Delta
     let strong_hash_ptr = RdiffSha1::new_ptr();
