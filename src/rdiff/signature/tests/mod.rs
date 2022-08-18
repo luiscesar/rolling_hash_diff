@@ -23,19 +23,19 @@ fn test_rdiff_signature_create_signature_case1() {
         let file = File::create(file_name.as_str()).unwrap();
         let mut writer = BufWriter::new(file);
         let mut input_data: Vec<u8> = Vec::new();
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'a');
         }
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'b');
         }
-        for i in 0..BLOCK_SIZE - 1 {
+        for _ in 0..BLOCK_SIZE - 1 {
             input_data.push(b'c');
         }
         file_size = input_data.len() as usize;
         let chunks = input_data.chunks(BLOCK_SIZE);
         chunks.for_each(|x| {
-            writer.write(x);
+            writer.write(x).unwrap();
             ()
         });
     }
@@ -65,13 +65,13 @@ fn test_rdiff_signature_create_signature_case2() {
         let file = File::create(file_name.as_str()).unwrap();
         let mut writer = BufWriter::new(file);
         let mut input_data: Vec<u8> = Vec::new();
-        for i in 0..BLOCK_SIZE - 1 {
+        for _ in 0..BLOCK_SIZE - 1 {
             input_data.push(b'c');
         }
         file_size = input_data.len() as usize;
         let chunks = input_data.chunks(BLOCK_SIZE);
         chunks.for_each(|x| {
-            writer.write(x);
+            writer.write(x).unwrap();
             ()
         });
     }
@@ -105,18 +105,18 @@ fn test_rdiff_signature_create_signature_file_case1() {
         let file = File::create(file_name.as_str()).unwrap();
         let mut writer = BufWriter::new(file);
         let mut input_data: Vec<u8> = Vec::new();
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'a');
         }
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'b');
         }
-        for i in 0..BLOCK_SIZE - 1 {
+        for _ in 0..BLOCK_SIZE - 1 {
             input_data.push(b'c');
         }
         let chunks = input_data.chunks(BLOCK_SIZE);
         chunks.for_each(|x| {
-            writer.write(x);
+            writer.write(x).unwrap();
             ()
         });
     }
@@ -149,12 +149,12 @@ fn test_rdiff_signature_create_signature_file_case2() {
         let file = File::create(file_name.as_str()).unwrap();
         let mut writer = BufWriter::new(file);
         let mut input_data: Vec<u8> = Vec::new();
-        for i in 0..BLOCK_SIZE - 1 {
+        for _ in 0..BLOCK_SIZE - 1 {
             input_data.push(b'c');
         }
         let chunks = input_data.chunks(BLOCK_SIZE);
         chunks.for_each(|x| {
-            writer.write(x);
+            writer.write(x).unwrap();
             ()
         });
     }
@@ -185,18 +185,18 @@ fn test_rdiff_signature_get_signature_from_file_case1() {
         let file = File::create(file_name.as_str()).unwrap();
         let mut writer = BufWriter::new(file);
         let mut input_data: Vec<u8> = Vec::new();
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'a');
         }
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'b');
         }
-        for i in 0..BLOCK_SIZE - 1 {
+        for _ in 0..BLOCK_SIZE - 1 {
             input_data.push(b'c');
         }
         let chunks = input_data.chunks(BLOCK_SIZE);
         chunks.for_each(|x| {
-            writer.write(x);
+            writer.write(x).unwrap();
             ()
         });
     }
@@ -242,12 +242,12 @@ fn test_rdiff_signature_get_signature_from_file_case2() {
         let file = File::create(file_name.as_str()).unwrap();
         let mut writer = BufWriter::new(file);
         let mut input_data: Vec<u8> = Vec::new();
-        for i in 0..BLOCK_SIZE - 1 {
+        for _ in 0..BLOCK_SIZE - 1 {
             input_data.push(b'c');
         }
         let chunks = input_data.chunks(BLOCK_SIZE);
         chunks.for_each(|x| {
-            writer.write(x);
+            writer.write(x).unwrap();
             ()
         });
     }

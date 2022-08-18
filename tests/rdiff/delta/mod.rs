@@ -27,18 +27,18 @@ pub fn integration_test_rdiff_main_delta_equals_files_case1() {
         let file = File::create(file_name.as_str()).unwrap();
         let mut writer = BufWriter::new(file);
         let mut input_data: Vec<u8> = Vec::new();
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'a');
         }
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'b');
         }
-        for i in 0..BLOCK_SIZE - 1 {
+        for _ in 0..BLOCK_SIZE - 1 {
             input_data.push(b'c');
         }
         let chunks = input_data.chunks(BLOCK_SIZE);
         chunks.for_each(|x| {
-            writer.write(x);
+            writer.write(x).unwrap();
             ()
         });
     }
@@ -111,18 +111,18 @@ pub fn integration_test_rdiff_main_delta_chunk_removed_case2() {
         let file = File::create(file_name.as_str()).unwrap();
         let mut writer = BufWriter::new(file);
         let mut input_data: Vec<u8> = Vec::new();
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'a');
         }
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'b');
         }
-        for i in 0..BLOCK_SIZE - 1 {
+        for _ in 0..BLOCK_SIZE - 1 {
             input_data.push(b'c');
         }
         let chunks = input_data.chunks(BLOCK_SIZE);
         chunks.for_each(|x| {
-            writer.write(x);
+            writer.write(x).unwrap();
             ()
         });
     }
@@ -143,10 +143,10 @@ pub fn integration_test_rdiff_main_delta_chunk_removed_case2() {
         let file = File::create(new_file_name.as_str()).unwrap();
         let mut writer = BufWriter::new(file);
         let mut input_data: Vec<u8> = Vec::new();
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'a');
         }
-        for i in 0..BLOCK_SIZE - 1 {
+        for _ in 0..BLOCK_SIZE - 1 {
             input_data.push(b'c');
         }
         let chunks = input_data.chunks(BLOCK_SIZE);
@@ -196,18 +196,18 @@ pub fn integration_test_rdiff_main_delta_chunk_changed_case3() {
         let file = File::create(file_name.as_str()).unwrap();
         let mut writer = BufWriter::new(file);
         let mut input_data: Vec<u8> = Vec::new();
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'a');
         }
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'b');
         }
-        for i in 0..BLOCK_SIZE - 1 {
+        for _ in 0..BLOCK_SIZE - 1 {
             input_data.push(b'c');
         }
         let chunks = input_data.chunks(BLOCK_SIZE);
         chunks.for_each(|x| {
-            writer.write(x);
+            writer.write(x).unwrap();
             ()
         });
     }
@@ -228,13 +228,13 @@ pub fn integration_test_rdiff_main_delta_chunk_changed_case3() {
         let file = File::create(new_file_name.as_str()).unwrap();
         let mut writer = BufWriter::new(file);
         let mut input_data: Vec<u8> = Vec::new();
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'd');
         }
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'b');
         }
-        for i in 0..BLOCK_SIZE - 1 {
+        for _ in 0..BLOCK_SIZE - 1 {
             input_data.push(b'c');
         }
         let chunks = input_data.chunks(BLOCK_SIZE);
@@ -263,7 +263,7 @@ pub fn integration_test_rdiff_main_delta_chunk_changed_case3() {
     // Set expected values
     let mut chunk_delta_list: Vec<ChunkDelta> = Vec::new();
     let mut differences: Vec<u8> = Vec::new();
-    for i in 0..BLOCK_SIZE {
+    for _ in 0..BLOCK_SIZE {
         differences.push(b'd');
     }
     chunk_delta_list.push(ChunkDelta::Diff(differences));
@@ -289,18 +289,18 @@ pub fn integration_test_rdiff_main_delta_chunk_shifted_case4() {
         let file = File::create(file_name.as_str()).unwrap();
         let mut writer = BufWriter::new(file);
         let mut input_data: Vec<u8> = Vec::new();
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'a');
         }
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'b');
         }
-        for i in 0..BLOCK_SIZE - 1 {
+        for _ in 0..BLOCK_SIZE - 1 {
             input_data.push(b'c');
         }
         let chunks = input_data.chunks(BLOCK_SIZE);
         chunks.for_each(|x| {
-            writer.write(x);
+            writer.write(x).unwrap();
             ()
         });
     }
@@ -322,16 +322,16 @@ pub fn integration_test_rdiff_main_delta_chunk_shifted_case4() {
         let file = File::create(new_file_name.as_str()).unwrap();
         let mut writer = BufWriter::new(file);
         let mut input_data: Vec<u8> = Vec::new();
-        for i in 0..shifted_size {
+        for _ in 0..shifted_size {
             input_data.push(b'd');
         }
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'a');
         }
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'b');
         }
-        for i in 0..BLOCK_SIZE - 1 {
+        for _ in 0..BLOCK_SIZE - 1 {
             input_data.push(b'c');
         }
         let chunks = input_data.chunks(BLOCK_SIZE);
@@ -360,7 +360,7 @@ pub fn integration_test_rdiff_main_delta_chunk_shifted_case4() {
     // Set expected values
     let mut chunk_delta_list: Vec<ChunkDelta> = Vec::new();
     let mut differences: Vec<u8> = Vec::new();
-    for i in 0..shifted_size {
+    for _ in 0..shifted_size {
         differences.push(b'd');
     }
     chunk_delta_list.push(ChunkDelta::Diff(differences));
@@ -387,18 +387,18 @@ pub fn integration_test_rdiff_main_delta_addition_between_chunks_case5() {
         let file = File::create(file_name.as_str()).unwrap();
         let mut writer = BufWriter::new(file);
         let mut input_data: Vec<u8> = Vec::new();
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'a');
         }
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'b');
         }
-        for i in 0..BLOCK_SIZE - 1 {
+        for _ in 0..BLOCK_SIZE - 1 {
             input_data.push(b'c');
         }
         let chunks = input_data.chunks(BLOCK_SIZE);
         chunks.for_each(|x| {
-            writer.write(x);
+            writer.write(x).unwrap();
             ()
         });
     }
@@ -420,16 +420,16 @@ pub fn integration_test_rdiff_main_delta_addition_between_chunks_case5() {
         let file = File::create(new_file_name.as_str()).unwrap();
         let mut writer = BufWriter::new(file);
         let mut input_data: Vec<u8> = Vec::new();
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'a');
         }
-        for i in 0..addition_size {
+        for _ in 0..addition_size {
             input_data.push(b'd');
         }
-        for i in 0..BLOCK_SIZE {
+        for _ in 0..BLOCK_SIZE {
             input_data.push(b'b');
         }
-        for i in 0..BLOCK_SIZE - 1 {
+        for _ in 0..BLOCK_SIZE - 1 {
             input_data.push(b'c');
         }
         let chunks = input_data.chunks(BLOCK_SIZE);
@@ -458,7 +458,7 @@ pub fn integration_test_rdiff_main_delta_addition_between_chunks_case5() {
     // Set expected values
     let mut chunk_delta_list: Vec<ChunkDelta> = Vec::new();
     let mut differences: Vec<u8> = Vec::new();
-    for i in 0..addition_size {
+    for _ in 0..addition_size {
         differences.push(b'd');
     }
     chunk_delta_list.push(ChunkDelta::Match(1));
