@@ -1,3 +1,2 @@
-pub mod weak;
 pub mod strong;
-
+pub mod weak;

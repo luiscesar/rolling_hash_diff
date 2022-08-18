@@ -5,5 +5,5 @@ use crate::rdiff::chunk::RdiffChecksum;
 pub type WeakHashPtr = Box<dyn WeakHash>;
 
 pub trait WeakHash {
-    fn checksum(&self, chunk:&[u8]) -> RdiffChecksum;
+    fn checksum(&self, chunk: &[u8]) -> RdiffChecksum;
 }

@@ -1,4 +1,4 @@
-const COMMAND:&str = "rolling_hash_diff";
+const COMMAND: &str = "rolling_hash_diff";
 
 mod util;
 
