@@ -1,13 +1,9 @@
 use std::{
     fs::File,
-    io::{BufWriter, Write},
+    io::{self, BufWriter, Write},
 };
 
-use rolling_hash_diff::rdiff::{
-    constants::BLOCK_SIZE,
-    error::messages::{FILE_NOT_FOUND, HELP_USAGE},
-    Rdiff,
-};
+use rolling_hash_diff::rdiff::{constants::BLOCK_SIZE, error::messages::HELP_USAGE, Rdiff};
 
 use crate::rdiff::{util::now_as_millis, COMMAND};
 
@@ -148,8 +144,9 @@ fn integration_test_rdiff_main_signature_error_file_missing_case3() {
     args.push(option.to_string());
     args.push(file_name.to_string());
     args.push(signature_file_name.to_string());
-    let rdiff_main_result = Rdiff::main_rdiff(args).unwrap_err();
-
-    // Verify result
-    assert!(rdiff_main_result.to_string().contains(FILE_NOT_FOUND));
+    let error = Rdiff::main_rdiff(args).unwrap_err();
+    // Set expected value
+    let expected_error = io::Error::from_raw_os_error(2);
+    // Verify computed value
+    assert_eq!(error.to_string(), expected_error.to_string());
 }
