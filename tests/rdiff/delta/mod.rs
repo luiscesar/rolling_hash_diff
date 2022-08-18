@@ -7,7 +7,7 @@ use bincode::deserialize_from;
 use rolling_hash_diff::rdiff::{
     constants::BLOCK_SIZE,
     delta::{ChunkDelta, Delta},
-    error::messages::{FILE_NOT_FOUND, HELP_USAGE},
+    error::messages::HELP_USAGE,
     Rdiff,
 };
 
