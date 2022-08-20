@@ -9,7 +9,7 @@ use crate::rdiff::{
 use super::RdiffChunk;
 
 pub trait RdiffChunkIterator {
-    fn next_chunk(&mut self) -> Result<Option<RdiffChunk>, RdiffError>;
+    fn next_chunk(&mut self) -> Result<Option<RdiffChunk>, RollingHashError>;
     fn get_chunk_size(&self) -> usize;
 }
 
@@ -34,7 +34,7 @@ impl BufferedRdiffChunkIterator {
     pub fn new_with_chunk_size(
         chunk_size: usize,
         rdiff_file: RdiffFile,
-    ) -> Result<BufferedRdiffChunkIterator, RdiffError> {
+    ) -> Result<BufferedRdiffChunkIterator, RollingHashError> {
         BufferedRdiffChunkIterator::validate_chunk_size(chunk_size)?;
         let buffer: Vec<u8> = Vec::new();
         Ok(BufferedRdiffChunkIterator {
@@ -56,9 +56,9 @@ impl BufferedRdiffChunkIterator {
         }
     }
 
-    fn validate_chunk_size(chunk_size: usize) -> Result<(), RdiffError> {
+    fn validate_chunk_size(chunk_size: usize) -> Result<(), RollingHashError> {
         if chunk_size > BLOCK_SIZE {
-            let rdiff_error = RollingHashError::rdiff_error(INVALID_CHUNK_SIZE);
+            let rdiff_error = RollingHashError::new(INVALID_CHUNK_SIZE);
             return Err(rdiff_error);
         }
         Ok(())
@@ -70,7 +70,7 @@ impl RdiffChunkIterator for BufferedRdiffChunkIterator {
         self.chunk_size
     }
 
-    fn next_chunk(&mut self) -> Result<Option<RdiffChunk>, RdiffError> {
+    fn next_chunk(&mut self) -> Result<Option<RdiffChunk>, RollingHashError> {
         // If memory buffer contains at one chunk
         if self.buffer.len() >= self.chunk_size {
             // Get that chunk and remove it from buffer
@@ -83,7 +83,11 @@ impl RdiffChunkIterator for BufferedRdiffChunkIterator {
         } else {
             // If memory buffer does not contain a chunk, get one from file,
             // if there is one
-            if let Some((size, next_block)) = self.rdiff_file.read_block()? {
+            if let Some((size, next_block)) = self
+                .rdiff_file
+                .read_block()
+                .or_else(|e| Err(RollingHashError::from(e)))?
+            {
                 // Update memory buffer with chunk from file
                 let next_block_data = &next_block[..size];
                 self.buffer.extend_from_slice(next_block_data);

@@ -3,7 +3,11 @@ use std::{
     io::{self, BufWriter, Write},
 };
 
-use rolling_hash_diff::rdiff::{constants::BLOCK_SIZE, error::messages::HELP_USAGE, Rdiff};
+use rolling_hash_diff::rdiff::{
+    constants::BLOCK_SIZE,
+    error::{messages::HELP_USAGE, RollingHashError},
+    Rdiff,
+};
 
 use crate::rdiff::{util::now_as_millis, COMMAND};
 
@@ -43,7 +47,7 @@ pub fn integration_test_rdiff_main_signature_case1() {
     args.push(signature_file_name.to_string());
     let rdiff_main_result = Rdiff::main_rdiff(args).unwrap();
 
-    // Verify result
+    // Verify computed value
     assert_eq!(rdiff_main_result, ());
 }
 
@@ -80,7 +84,7 @@ pub fn integration_test_rdiff_main_signature_case2() {
     args.push(signature_file_name.to_string());
     let rdiff_main_result = Rdiff::main_rdiff(args).unwrap();
 
-    // Verify result
+    // Verify computed value
     assert_eq!(rdiff_main_result, ());
 }
 
@@ -100,10 +104,12 @@ fn integration_test_rdiff_main_signature_error_no_option_case1() {
     //args.push(option.to_string());
     args.push(file_name.to_string());
     args.push(signature_file_name.to_string());
-    let rdiff_main_result = Rdiff::main_rdiff(args).unwrap_err();
+    let error = Rdiff::main_rdiff(args).unwrap_err();
 
-    // Verify result
-    assert_eq!(rdiff_main_result.to_string(), HELP_USAGE);
+    // Set expected value
+    let expected_error = RollingHashError::new(HELP_USAGE);
+    // Verify computed value
+    assert_eq!(error, expected_error);
 }
 
 #[test]
@@ -122,10 +128,11 @@ fn integration_test_rdiff_main_signature_error_file_name_missing_case2() {
     args.push(option.to_string());
     //args.push(file_name.to_string());
     args.push(signature_file_name.to_string());
-    let rdiff_main_result = Rdiff::main_rdiff(args).unwrap_err();
-
-    // Verify result
-    assert_eq!(rdiff_main_result.to_string(), HELP_USAGE);
+    let error = Rdiff::main_rdiff(args).unwrap_err();
+    // Set expected value
+    let expected_error = RollingHashError::new(HELP_USAGE);
+    // Verify computed value
+    assert_eq!(error, expected_error);
 }
 
 #[test]
@@ -146,7 +153,7 @@ fn integration_test_rdiff_main_signature_error_file_missing_case3() {
     args.push(signature_file_name.to_string());
     let error = Rdiff::main_rdiff(args).unwrap_err();
     // Set expected value
-    let expected_error = io::Error::from_raw_os_error(2);
+    let expected_error = RollingHashError::from(Box::new(io::Error::from_raw_os_error(2)));
     // Verify computed value
-    assert_eq!(error.to_string(), expected_error.to_string());
+    assert_eq!(error, expected_error);
 }

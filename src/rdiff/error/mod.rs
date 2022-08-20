@@ -19,6 +19,10 @@ impl RollingHashError {
         let error = RollingHashError::new(msg);
         Box::new(error)
     }
+
+    pub fn from(e: RdiffError) -> RollingHashError {
+        RollingHashError::new(e.to_string().as_str())
+    }
 }
 
 impl Error for RollingHashError {}

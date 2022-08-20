@@ -4,6 +4,8 @@ use std::io::{BufReader, Read};
 use crate::rdiff::constants::BLOCK_SIZE;
 use crate::rdiff::error::RdiffError;
 
+use super::error::RollingHashError;
+
 #[derive(Debug)]
 pub struct RdiffFile {
     reader: BufReader<File>,
@@ -12,8 +14,9 @@ pub struct RdiffFile {
 }
 
 impl RdiffFile {
-    pub fn new(filename: &str) -> Result<RdiffFile, RdiffError> {
-        let f = File::open(filename)?;
+    pub fn new(filename: &str) -> Result<RdiffFile, RollingHashError> {
+        let f = File::open(filename).or_else(|e| Err(RollingHashError::from(Box::new(e))))?;
+
         let size = f.metadata().unwrap().len();
         let reader = BufReader::new(f);
         Ok(RdiffFile {

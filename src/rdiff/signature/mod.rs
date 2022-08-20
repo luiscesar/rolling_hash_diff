@@ -12,7 +12,7 @@ use super::{
         iterator::{BufferedRdiffChunkIterator, RdiffChunkIterator},
         RdiffChunkDigest, RdiffChunkTable,
     },
-    error::RdiffError,
+    error::RollingHashError,
     hash::{strong::StrongHashPtr, weak::WeakHashPtr},
     io::RdiffFile,
 };
@@ -54,21 +54,30 @@ impl Signature {
         signature_file_name: &str,
         weak_hash_ptr: WeakHashPtr,
         strong_hash_ptr: StrongHashPtr,
-    ) -> Result<(), RdiffError> {
+    ) -> Result<(), RollingHashError> {
         let signature = Signature::create_signature(file_name, weak_hash_ptr, strong_hash_ptr)?;
+
         // Write serialized signature to file
-        let signature_file = File::create(signature_file_name)?;
+        let signature_file = File::create(signature_file_name)
+            .or_else(|e| Err(RollingHashError::from(Box::new(e))))?;
+
         let mut sig_writer = BufWriter::new(signature_file);
-        serialize_into(&mut sig_writer, &signature)?;
+        serialize_into(&mut sig_writer, &signature)
+            .or_else(|e| Err(RollingHashError::from(Box::new(e))))?;
+
         Ok(())
     }
 
-    pub fn get_signature_from_file(signature_file_name: &str) -> Result<Signature, RdiffError> {
+    pub fn get_signature_from_file(
+        signature_file_name: &str,
+    ) -> Result<Signature, RollingHashError> {
         // Get signture file
-        let signature_file = File::open(signature_file_name)?;
+        let signature_file = File::open(signature_file_name)
+            .or_else(|e| Err(RollingHashError::from(Box::new(e))))?;
         let sig_reader = BufReader::new(signature_file);
         // Get signature from file
-        let signature: Signature = deserialize_from(sig_reader)?;
+        let signature: Signature =
+            deserialize_from(sig_reader).or_else(|e| Err(RollingHashError::from(Box::new(e))))?;
         Ok(signature)
     }
 
@@ -76,9 +85,10 @@ impl Signature {
         file_name: &str,
         weak_hash_ptr: WeakHashPtr,
         strong_hash_ptr: StrongHashPtr,
-    ) -> Result<Signature, RdiffError> {
+    ) -> Result<Signature, RollingHashError> {
         // Get rdiff file
         let rdiff_file = RdiffFile::new(file_name)?;
+
         // Build chunk iterator
         let mut iterator = BufferedRdiffChunkIterator::new(rdiff_file);
         // Init chunk table

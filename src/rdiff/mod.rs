@@ -1,7 +1,7 @@
 use self::{
     constants::{DELTA, SIGNATURE},
     delta::Delta,
-    error::{messages::HELP_USAGE, RdiffError, RollingHashError},
+    error::{messages::HELP_USAGE, RollingHashError},
     hash::{strong::rdiff_sha1::RdiffSha1, weak::rdiff_addler::RdiffAddler},
     signature::Signature,
 };
@@ -15,7 +15,7 @@ pub mod io;
 pub mod signature;
 pub mod util;
 
-pub type RdiffMainResult = Result<(), RdiffError>;
+pub type RdiffMainResult = Result<(), RollingHashError>;
 
 pub struct Rdiff;
 
@@ -26,10 +26,10 @@ impl Rdiff {
             match args.get(1).unwrap().as_str() {
                 SIGNATURE => Rdiff::rdiff_signature(args),
                 DELTA => Rdiff::rdiff_delta(args),
-                _ => Err(RollingHashError::rdiff_error(HELP_USAGE)),
+                _ => Err(RollingHashError::new(HELP_USAGE)),
             }
         } else {
-            Err(RollingHashError::rdiff_error(HELP_USAGE))
+            Err(RollingHashError::new(HELP_USAGE))
         }
     }
 
@@ -54,7 +54,7 @@ impl Rdiff {
             )?;
             Ok(result)
         } else {
-            Err(RollingHashError::rdiff_error(HELP_USAGE))
+            Err(RollingHashError::new(HELP_USAGE))
         }
     }
 
@@ -82,7 +82,7 @@ impl Rdiff {
             )?;
             Ok(result)
         } else {
-            Err(RollingHashError::rdiff_error(HELP_USAGE))
+            Err(RollingHashError::new(HELP_USAGE))
         }
     }
 }

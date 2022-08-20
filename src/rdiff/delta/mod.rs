@@ -34,15 +34,18 @@ impl Delta {
         signature_file_name: &str,
         weak_hash_ptr: WeakHashPtr,
         strong_hash_ptr: StrongHashPtr,
-    ) -> Result<(), RdiffError> {
+    ) -> Result<(), RollingHashError> {
         // Get signature
         let signature = Signature::get_signature_from_file(signature_file_name)?;
         // Get delta
         let delta = Delta::generate_delta(file_name, signature, weak_hash_ptr, strong_hash_ptr)?;
         // Write serialized delta to file
-        let delta_file = File::create(delta_file_name)?;
+        let delta_file =
+            File::create(delta_file_name).or_else(|e| Err(RollingHashError::from(Box::new(e))))?;
         let mut delta_writer = BufWriter::new(delta_file);
-        serialize_into(&mut delta_writer, &delta)?;
+        serialize_into(&mut delta_writer, &delta)
+            .or_else(|e| Err(RollingHashError::from(Box::new(e))))?;
+
         Ok(())
     }
 
@@ -51,7 +54,7 @@ impl Delta {
         signature: Signature,
         weak_hash_ptr: WeakHashPtr,
         strong_hash_ptr: StrongHashPtr,
-    ) -> Result<Delta, RdiffError> {
+    ) -> Result<Delta, RollingHashError> {
         // Get rdiff file from input file given by filename
         let rdiff_file = RdiffFile::new(file_name)?;
         // Get file size
@@ -217,9 +220,7 @@ impl Delta {
             }
         }
         if processed_data_size != file_size {
-            return Err(RollingHashError::rdiff_error(
-                DELTA_PROCESSED_DATA_SIZE_ERROR,
-            ));
+            return Err(RollingHashError::new(DELTA_PROCESSED_DATA_SIZE_ERROR));
         }
         Ok(Delta { chunk_delta_list })
     }
