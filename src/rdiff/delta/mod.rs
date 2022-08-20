@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use super::chunk::iterator::RdiffChunkIterator;
 use super::{
     chunk::iterator::BufferedRdiffChunkIterator,
-    error::{messages::DELTA_PROCESSED_DATA_SIZE_ERROR, RdiffError, RollingHashError},
+    error::{messages::DELTA_PROCESSED_DATA_SIZE_ERROR, RollingHashError},
     hash::{strong::StrongHashPtr, weak::WeakHashPtr},
     io::RdiffFile,
     signature::Signature,

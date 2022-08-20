@@ -2,7 +2,7 @@ use std::cmp;
 
 use crate::rdiff::{
     constants::BLOCK_SIZE,
-    error::{messages::INVALID_CHUNK_SIZE, RdiffError, RollingHashError},
+    error::{messages::INVALID_CHUNK_SIZE, RollingHashError},
     io::RdiffFile,
 };
 
