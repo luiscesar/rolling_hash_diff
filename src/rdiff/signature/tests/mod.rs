@@ -1,6 +1,6 @@
 use std::{
     fmt::format,
-    fs::File,
+    fs::{File, self},
     io::{BufWriter, Write},
     time::SystemTime,
 };
@@ -54,6 +54,10 @@ fn test_rdiff_signature_create_signature_case1() {
     let expected_last_chunk_size = file_size - expected_number_of_chunks * expected_chunk_size;
     assert_eq!(signature.get_chunk_size(), expected_chunk_size);
     assert_eq!(signature.get_last_chunk_size(), expected_last_chunk_size);
+
+    // Clean up verification
+    fs::remove_file(file_name).unwrap();
+    
 }
 
 #[test]
@@ -90,6 +94,10 @@ fn test_rdiff_signature_create_signature_case2() {
     let expected_last_chunk_size = file_size - expected_number_of_chunks * expected_chunk_size;
     assert_eq!(signature.get_chunk_size(), expected_chunk_size);
     assert_eq!(signature.get_last_chunk_size(), expected_last_chunk_size);
+
+    // Clean up verification
+    fs::remove_file(file_name).unwrap();
+
 }
 
 #[test]
@@ -134,6 +142,11 @@ fn test_rdiff_signature_create_signature_file_case1() {
     )
     .unwrap();
     assert_eq!(result, ());
+
+    // Clean up verification
+    fs::remove_file(file_name).unwrap();
+    fs::remove_file(signature_file_name).unwrap();
+
 }
 
 #[test]
@@ -172,6 +185,11 @@ fn test_rdiff_signature_create_signature_file_case2() {
     )
     .unwrap();
     assert_eq!(result, ());
+
+    // Clean up verification
+    fs::remove_file(file_name).unwrap();
+    fs::remove_file(signature_file_name).unwrap();
+
 }
 
 #[test]
@@ -229,6 +247,11 @@ fn test_rdiff_signature_get_signature_from_file_case1() {
 
     // Compare results
     assert_eq!(computed_signature, expected_signature);
+
+    // Clean up verification
+    fs::remove_file(file_name).unwrap();
+    fs::remove_file(signature_file_name).unwrap();
+
 }
 
 #[test]
@@ -280,6 +303,11 @@ fn test_rdiff_signature_get_signature_from_file_case2() {
 
     // Compare results
     assert_eq!(computed_signature, expected_signature);
+
+    // Clean up verification
+    fs::remove_file(file_name).unwrap();
+    fs::remove_file(signature_file_name).unwrap();
+    
 }
 
 fn compute_chunk_size(file_size: usize) -> usize {
