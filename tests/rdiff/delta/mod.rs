@@ -1,5 +1,5 @@
 use std::{
-    fs::{File, self},
+    fs::{self, File},
     io::{self, BufReader, BufWriter, Read, Write},
 };
 
@@ -106,7 +106,6 @@ pub fn integration_test_rdiff_main_delta_equals_files_case1() {
     fs::remove_file(signature_file_name).unwrap();
     fs::remove_file(new_file_name).unwrap();
     fs::remove_file(delta_file_name).unwrap();
-
 }
 
 #[test]
@@ -203,7 +202,6 @@ pub fn integration_test_rdiff_main_delta_chunk_removed_case2() {
     fs::remove_file(signature_file_name).unwrap();
     fs::remove_file(new_file_name).unwrap();
     fs::remove_file(delta_file_name).unwrap();
-
 }
 
 #[test]
@@ -308,7 +306,6 @@ pub fn integration_test_rdiff_main_delta_chunk_changed_case3() {
     fs::remove_file(signature_file_name).unwrap();
     fs::remove_file(new_file_name).unwrap();
     fs::remove_file(delta_file_name).unwrap();
-
 }
 
 #[test]
@@ -418,7 +415,6 @@ pub fn integration_test_rdiff_main_delta_chunk_shifted_case4() {
     fs::remove_file(signature_file_name).unwrap();
     fs::remove_file(new_file_name).unwrap();
     fs::remove_file(delta_file_name).unwrap();
-
 }
 
 #[test]
@@ -528,7 +524,6 @@ pub fn integration_test_rdiff_main_delta_addition_between_chunks_case5() {
     fs::remove_file(signature_file_name).unwrap();
     fs::remove_file(new_file_name).unwrap();
     fs::remove_file(delta_file_name).unwrap();
-
 }
 
 #[test]

@@ -1,5 +1,5 @@
 use std::{
-    fs::File,
+    fs::{self, File},
     io::{self, BufWriter, Write},
 };
 
@@ -49,6 +49,10 @@ pub fn integration_test_rdiff_main_signature_case1() {
 
     // Verify computed value
     assert_eq!(rdiff_main_result, ());
+
+    // Clean up verification
+    fs::remove_file(file_name).unwrap();
+    fs::remove_file(signature_file_name).unwrap();
 }
 
 #[test]
@@ -86,6 +90,10 @@ pub fn integration_test_rdiff_main_signature_case2() {
 
     // Verify computed value
     assert_eq!(rdiff_main_result, ());
+
+    // Clean up verification
+    fs::remove_file(file_name).unwrap();
+    fs::remove_file(signature_file_name).unwrap();
 }
 
 #[test]
@@ -98,7 +106,7 @@ fn integration_test_rdiff_main_signature_error_no_option_case1() {
     let signature_file_name = format!("{}.sig", file_name);
 
     // Execute command
-    let option = "signature";
+    //let option = "signature";
     let mut args: Vec<String> = Vec::new();
     args.push(COMMAND.to_string());
     //args.push(option.to_string());

@@ -1,5 +1,5 @@
 use std::{
-    fs::{File, self},
+    fs::{self, File},
     io::{BufReader, BufWriter, Read, Write},
 };
 
@@ -107,7 +107,6 @@ fn test_delta_generate_delta_equals_files_case1() {
     fs::remove_file(file_name).unwrap();
     fs::remove_file(signature_file_name).unwrap();
     fs::remove_file(new_file_name).unwrap();
-
 }
 
 #[test]
@@ -201,11 +200,10 @@ fn test_delta_generate_delta_chunk_removed_case2() {
     let file_name = format!("{}.txt", prefix_file_name);
     let signature_file_name = format!("{}.sig", file_name);
     let new_file_name = format!("{}.v1.txt", prefix_file_name);
-    
+
     fs::remove_file(file_name).unwrap();
     fs::remove_file(signature_file_name).unwrap();
     fs::remove_file(new_file_name).unwrap();
-
 }
 
 #[test]
@@ -311,7 +309,6 @@ fn test_delta_generate_delta_chunk_changed_case3() {
     fs::remove_file(file_name).unwrap();
     fs::remove_file(signature_file_name).unwrap();
     fs::remove_file(new_file_name).unwrap();
-
 }
 
 #[test]
@@ -421,7 +418,6 @@ fn test_delta_generate_delta_chunk_shifted_case4() {
     fs::remove_file(file_name).unwrap();
     fs::remove_file(signature_file_name).unwrap();
     fs::remove_file(new_file_name).unwrap();
-
 }
 
 #[test]
@@ -532,7 +528,6 @@ fn test_delta_generate_delta_addition_between_chunks_case5() {
     fs::remove_file(file_name).unwrap();
     fs::remove_file(signature_file_name).unwrap();
     fs::remove_file(new_file_name).unwrap();
-
 }
 
 #[test]
@@ -763,7 +758,6 @@ fn test_delta_create_delta_file_chunk_removed_case2() {
     fs::remove_file(signature_file_name).unwrap();
     fs::remove_file(new_file_name).unwrap();
     fs::remove_file(delta_file_name).unwrap();
-
 }
 
 #[test]
@@ -883,7 +877,6 @@ fn test_delta_create_delta_file_chunk_changed_case3() {
     fs::remove_file(signature_file_name).unwrap();
     fs::remove_file(new_file_name).unwrap();
     fs::remove_file(delta_file_name).unwrap();
-
 }
 
 #[test]
@@ -1007,7 +1000,6 @@ fn test_delta_create_delta_file_chunk_shifted_case4() {
     fs::remove_file(signature_file_name).unwrap();
     fs::remove_file(new_file_name).unwrap();
     fs::remove_file(delta_file_name).unwrap();
-
 }
 
 #[test]

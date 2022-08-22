@@ -1,6 +1,6 @@
 use std::{
     fmt::format,
-    fs::{File, self},
+    fs::{self, File},
     io::{BufWriter, Write},
     time::SystemTime,
 };
@@ -57,7 +57,6 @@ fn test_rdiff_signature_create_signature_case1() {
 
     // Clean up verification
     fs::remove_file(file_name).unwrap();
-    
 }
 
 #[test]
@@ -97,7 +96,6 @@ fn test_rdiff_signature_create_signature_case2() {
 
     // Clean up verification
     fs::remove_file(file_name).unwrap();
-
 }
 
 #[test]
@@ -146,7 +144,6 @@ fn test_rdiff_signature_create_signature_file_case1() {
     // Clean up verification
     fs::remove_file(file_name).unwrap();
     fs::remove_file(signature_file_name).unwrap();
-
 }
 
 #[test]
@@ -189,7 +186,6 @@ fn test_rdiff_signature_create_signature_file_case2() {
     // Clean up verification
     fs::remove_file(file_name).unwrap();
     fs::remove_file(signature_file_name).unwrap();
-
 }
 
 #[test]
@@ -251,7 +247,6 @@ fn test_rdiff_signature_get_signature_from_file_case1() {
     // Clean up verification
     fs::remove_file(file_name).unwrap();
     fs::remove_file(signature_file_name).unwrap();
-
 }
 
 #[test]
@@ -307,7 +302,6 @@ fn test_rdiff_signature_get_signature_from_file_case2() {
     // Clean up verification
     fs::remove_file(file_name).unwrap();
     fs::remove_file(signature_file_name).unwrap();
-    
 }
 
 fn compute_chunk_size(file_size: usize) -> usize {
