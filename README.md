@@ -1,7 +1,7 @@
 # Rolling Hash Diff
 
 ## Description
-A rolling hash based file diffing algorithm. When comparing original and an updated version of an input, it should return a description ("delta") which can be used to upgrade an original version of the file into the new file. The description contains the chunks which:
+A rolling hash based file diffing algorithm. When comparing original and an updated version of an input, it should return a description ("delta") which can be used to upgrade an original version of the file into the new file.
 
 A library that does a similar thing is rdiff. The patch part of the API has not been implemented.
 
@@ -11,6 +11,7 @@ Chunk size can be fixed or dynamic, but must be split to at least two chunks on 
 Should be able to recognize changes between chunks. Only the exact differing locations should be added to the delta.
 
 ### Use Cases
+* Signature creation
 * Chunk removed
 * Chunk changed
 * Chunk shifted
