@@ -20,11 +20,11 @@ Should be able to recognize changes between chunks. Only the exact differing loc
 * Delta generation: Additional data added between chunks
 
 ## Execution
-### Build project
+### Build Project
 cargo build -r 
 ### Setup Environment
 export PATH=./target/release:$PATH
-### Execute command
+### Execute Command
 #### Signature
 rolling_hash_diff signature <file_name> <signature_file_name>
 
