@@ -1,5 +1,5 @@
 use std::{
-    fs::File,
+    fs::{File, self},
     io::{self, BufReader, BufWriter, Read, Write},
 };
 
@@ -95,6 +95,18 @@ pub fn integration_test_rdiff_main_delta_equals_files_case1() {
 
     // Verify computed values
     assert_eq!(delta, expected_delta);
+
+    // Clean up verification
+    let file_name = format!("{}.txt", prefix_file_name);
+    let signature_file_name = format!("{}.sig", file_name);
+    let new_file_name = format!("{}.v1.txt", prefix_file_name);
+    let delta_file_name = format!("{}.v1.txt.delta", prefix_file_name);
+
+    fs::remove_file(file_name).unwrap();
+    fs::remove_file(signature_file_name).unwrap();
+    fs::remove_file(new_file_name).unwrap();
+    fs::remove_file(delta_file_name).unwrap();
+
 }
 
 #[test]
@@ -180,6 +192,18 @@ pub fn integration_test_rdiff_main_delta_chunk_removed_case2() {
 
     // Verify computed values
     assert_eq!(delta, expected_delta);
+
+    // Clean up verification
+    let file_name = format!("{}.txt", prefix_file_name);
+    let signature_file_name = format!("{}.sig", file_name);
+    let new_file_name = format!("{}.v1.txt", prefix_file_name);
+    let delta_file_name = format!("{}.v1.txt.delta", prefix_file_name);
+
+    fs::remove_file(file_name).unwrap();
+    fs::remove_file(signature_file_name).unwrap();
+    fs::remove_file(new_file_name).unwrap();
+    fs::remove_file(delta_file_name).unwrap();
+
 }
 
 #[test]
@@ -273,6 +297,18 @@ pub fn integration_test_rdiff_main_delta_chunk_changed_case3() {
 
     // Verify computed values
     assert_eq!(delta, expected_delta);
+
+    // Clean up verification
+    let file_name = format!("{}.txt", prefix_file_name);
+    let signature_file_name = format!("{}.sig", file_name);
+    let new_file_name = format!("{}.v1.txt", prefix_file_name);
+    let delta_file_name = format!("{}.v1.txt.delta", prefix_file_name);
+
+    fs::remove_file(file_name).unwrap();
+    fs::remove_file(signature_file_name).unwrap();
+    fs::remove_file(new_file_name).unwrap();
+    fs::remove_file(delta_file_name).unwrap();
+
 }
 
 #[test]
@@ -371,6 +407,18 @@ pub fn integration_test_rdiff_main_delta_chunk_shifted_case4() {
 
     // Verify computed values
     assert_eq!(delta, expected_delta);
+
+    // Clean up verification
+    let file_name = format!("{}.txt", prefix_file_name);
+    let signature_file_name = format!("{}.sig", file_name);
+    let new_file_name = format!("{}.v1.txt", prefix_file_name);
+    let delta_file_name = format!("{}.v1.txt.delta", prefix_file_name);
+
+    fs::remove_file(file_name).unwrap();
+    fs::remove_file(signature_file_name).unwrap();
+    fs::remove_file(new_file_name).unwrap();
+    fs::remove_file(delta_file_name).unwrap();
+
 }
 
 #[test]
@@ -469,6 +517,18 @@ pub fn integration_test_rdiff_main_delta_addition_between_chunks_case5() {
 
     // Verify computed values
     assert_eq!(delta, expected_delta);
+
+    // Clean up verification
+    let file_name = format!("{}.txt", prefix_file_name);
+    let signature_file_name = format!("{}.sig", file_name);
+    let new_file_name = format!("{}.v1.txt", prefix_file_name);
+    let delta_file_name = format!("{}.v1.txt.delta", prefix_file_name);
+
+    fs::remove_file(file_name).unwrap();
+    fs::remove_file(signature_file_name).unwrap();
+    fs::remove_file(new_file_name).unwrap();
+    fs::remove_file(delta_file_name).unwrap();
+
 }
 
 #[test]
@@ -481,7 +541,7 @@ fn integration_test_rdiff_main_delta_error_no_option_case1() {
     let delta_file_name = format!("{}.v1.txt.delta", prefix_file_name);
 
     // Execute command
-    let option = "delta";
+    //let option = "delta";
     let mut args: Vec<String> = Vec::new();
     args.push(COMMAND.to_string());
     //args.push(option.to_string());
@@ -499,8 +559,8 @@ fn integration_test_rdiff_main_delta_error_no_option_case1() {
 fn integration_test_rdiff_main_delta_error_file_name_missing_case2() {
     // Get file names
     let prefix_file_name = format!("resources/test_main_delta_error_case2.{}", now_as_millis());
-    let file_name = format!("{}.txt", prefix_file_name);
-    let signature_file_name = format!("{}.sig", file_name);
+    //let file_name = format!("{}.txt", prefix_file_name);
+    //let signature_file_name = format!("{}.sig", file_name);
     let new_file_name = format!("{}.v1.txt", prefix_file_name);
     let delta_file_name = format!("{}.v1.txt.delta", prefix_file_name);
 
